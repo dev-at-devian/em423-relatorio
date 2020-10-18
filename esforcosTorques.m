@@ -1,4 +1,4 @@
-function retval = esforcosTensores (Torques, apoios, L)
+function retval = esforcosTorques (Torques, apoios, L)
   
   vetorTorques = Torques
 
