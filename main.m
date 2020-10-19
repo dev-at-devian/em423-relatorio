@@ -3,6 +3,7 @@ clear all
 format long
 
 addpath("parser");
+addpath("printer");
 
 global forcas_verticais = [];   # {valor, posicao}
 global forcas_horizontais = []; # {valor, posicao}
@@ -13,24 +14,8 @@ global carregamentos = [];      # {posicao_inicio, posicao_fim, {coeficiente1,..
 global viga = [];               # {comprimento, altura}
 
 
-# Testando todos os vetores lidos
-
-file_parse();
-
-printf("Viga:\n");
-disp(viga);
-printf("\nForças Verticais:\n");
-disp(forcas_verticais);
-printf("\nForças Horizontais:\n");
-disp(forcas_horizontais);
-printf("\nMomentos:\n");
-disp(momentos);
-printf("\nTorques:\n");
-disp(torques);
-printf("\nApoios:\n");
-disp(apoios);
-printf("\nCarregamentos:\n");
-disp(carregamentos);
+# Obtemos as informações do problema contidas no arquivo dados.txt
+file_parse(); 
 
 # Convertemos forças de carregamento em forças verticais para cálculo de reações 
 pontuais_carregamentos = carregamentos_para_forcas(carregamentos);
@@ -52,24 +37,6 @@ esforcosTorques(torques, apoios, viga{1});
 esforcosVerticais(forcas_verticais_com_carregamentos, apoios, carregamentos, viga{1});
  
 #esforcosMomentos (momentos_de_forcas, momentos, apoios, carregamentos, viga{1});
- 
-printf("\nApós processamento:\n\n");
 
-printf("Viga:\n");
-disp(viga);
-printf("\nForças Verticais:\n");
-disp(forcas_verticais);
-printf("\nForças Horizontais:\n");
-disp(forcas_horizontais);
-printf("\nMomentos:\n");
-disp(momentos);
-printf("\nTorques:\n");
-disp(torques);
-printf("\nApoios:\n");
-disp(apoios);
-printf("\nCarregamentos:\n");
-disp(carregamentos);
-printf("\nForças Verticais+Carregamentos:\n");
-disp(forcas_verticais_com_carregamentos);
-printf("\nMomentos+Forças:\n");
-disp(momentos_com_carregamentos);
+# Mostramos as reações de apoio obtidas
+print_support_reactions();
