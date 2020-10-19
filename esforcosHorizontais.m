@@ -7,8 +7,8 @@ function retval = esforcosHorizontais (forcas_horizontais, apoios, L)
 
   for i = 1:n_apoios
 	apoio = cell2mat(apoios{i});	
-    	if !isnan(apoio(3))
-       		vetorHorizontal{end+1} = {apoio(3), apoio(1)};
+    	if !isnan(apoio(2))
+       		vetorHorizontal{end+1} = {apoio(2), apoio(1)};
     	end
   end
 
@@ -42,8 +42,9 @@ function retval = esforcosHorizontais (forcas_horizontais, apoios, L)
     T_hist = [T_hist sumHorizontal];
   end
     
-  T_hist = [T_hist sumHorizontal]
-  x_hist = [x_hist L]
+  T_hist = [T_hist sumHorizontal];
+  x_hist = [x_hist L];
  
   [xs, ys] = stairs(x_hist, T_hist);
-  plot(xs, ys)
+  figure(1);
+  plot(xs, ys);

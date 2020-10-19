@@ -1,6 +1,6 @@
 function retval = esforcosTorques (Torques, apoios, L)
   
-  vetorTorques = Torques
+  vetorTorques = Torques;
 
   # Junta os apoios com reacao de torque ao conjunto de torques
   n_apoios = size(apoios, 2);
@@ -38,8 +38,6 @@ function retval = esforcosTorques (Torques, apoios, L)
   
   T_hist = [T_hist 0];
   x_hist = [x_hist 0];
-
-  vetorTorques
   
   for i = 1:nTorques
     x_hist = [x_hist vetorTorques{i}{2}];
@@ -51,4 +49,5 @@ function retval = esforcosTorques (Torques, apoios, L)
   x_hist = [x_hist L];
  
   [xs, ys] = stairs(x_hist, T_hist);
+  figure(2); 
   plot(xs, ys)

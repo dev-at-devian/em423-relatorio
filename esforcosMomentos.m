@@ -7,7 +7,14 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
   for i = 1:n_apoios
 	apoio = cell2mat(apoios{i});	
     	if !isnan(apoio(4))
-       		vetorMomentos{end+1} = {apoio(4), apoio(1)};
+       		momentos{end+1} = {apoio(4), apoio(1)};
+    	end
+	if !isnan(apoio(3))
+		if(apoio(1) != 0)
+       			vetorMomentos{end+1} = {apoio(1) * apoio(3), apoio(1)};
+		else
+			vetorMomentos{end+1} = {apoio(3), apoio(1)};
+		end			
     	end
   end
 
@@ -33,61 +40,71 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
   x_hist = [];
   Fv_hist = [];
   n_carregamentos = size(carregamentos, 2);
-  n_momentos_puros = size(momentos, 2)
+  n_momentos_puros = size(momentos, 2);
+
+  sum_puros = 0;
+
+  # momentos puros
+  for j = 1:n_momentos_puros
+	sum_puros -= momentos{j}{1};
+  end
   
   Fv_hist = [Fv_hist 0];
   x_hist = [x_hist 0];
-   
-  vetorMomentos  
 
-  for i = 1:nMomentos
-    xm = vetorMomentos{i}{2};
-    res = 0
-
-    # momentos puros
-    for j = 1:n_momentos_puros
-	res -= momentos{j}{1}
-    end
-
+  for x = 0:0.01:L
+    res = sum_puros;
     index_carregamento = 0;
 
-    # Busca se Momento vem de carregamento ou nao
+    # Busca se posicao esta dentro de carregamento ou nao
     for j = 1:n_carregamentos
-	if((xm <= carregamentos{j}{2}) && (xm >= carregamentos{j}{1}))
+	if((x < carregamentos{j}{2}) && (x > carregamentos{j}{1}))
 		index_carregamento = j;
+                xi = carregamentos{j}{1};
 		break;
 	end
     end
     
     # Se for carregamento, realiza tratamento especifico
-    if index_carregamento != 0	
-      x0 = carregamentos{index_carregamento}{1};
-      x1 = carregamentos{index_carregamento}{2};
-      polinomio = cell2mat(carregamentos{index_carregamento}{3}); 
-      int_poli = polyint(polinomio);
-      for j = x0:(x1 - x0)/100:x1
-        x_hist = [x_hist j];
-        cul = sumVertical - (polyval(int_poli, j) - polyval(int_poli, x0));
-        Fv_hist = [Fv_hist cul];
-      end
+    if index_carregamento != 0
+	 # momentos de forca
+   	 for j = 1:nMomentos
+         	if xi >= vetorMomentos{j}{2}
+			if(vetorMomentos{j}{2} != 0)
+				res += (x - vetorMomentos{j}{2}) * vetorMomentos{j}{1} / vetorMomentos{j}{2};
+			else
+				res += (x - vetorMomentos{j}{2}) * vetorMomentos{j}{1};
+			end
+   		else
+			break;
+		end 
+	 end
+         polinomio = cell2mat(carregamentos{index_carregamento}{3}); 
+         int_poli = polyint(polinomio);
+         int_mom = polyint([polinomio 0]);
+         res_forca = polyval(int_poli, x) - polyval(int_poli, xi);
+         centroide = (polyval(int_mom, x) - polyval(int_mom, xi)) / res_forca;
+         res += (x - centroide) * (res_forca);
     else
  	 # momentos de forca
-   	 for j = 1:(i - 1)
-		res += ( - vetorMomentos{j}{2}) * vetorMomentos{j}{1} / vetorMomentos{j}{2}
-   	 end
+   	 for j = 1:nMomentos
+         	if x > vetorMomentos{j}{2}
+			if(vetorMomentos{j}{2} != 0)
+				res += (x - vetorMomentos{j}{2}) * vetorMomentos{j}{1} / vetorMomentos{j}{2};
+			else
+				res += (x - vetorMomentos{j}{2}) * vetorMomentos{j}{1};
+			end
+   		else
+			break;
+		end 
+	 end
     end
-
- 
-
-    sumVertical -= res;
-    Fv_hist = [Fv_hist sumVertical];
-    x_hist = [x_hist xm];
+    x_hist = [x_hist x];
+    Fv_hist = [Fv_hist res];	
   end
-    
-  Fv_hist = [Fv_hist sumVertical];
-  x_hist = [x_hist L];
  
   [xs, ys] = stairs(x_hist, Fv_hist);
-  plot(xs, ys)
+  figure(4);
+  plot(xs, ys);
 
 endfunction

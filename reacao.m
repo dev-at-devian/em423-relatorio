@@ -3,8 +3,8 @@
 function vetor_apoio = reacao(x,forcas_y,forcas_x,M, T)
   
   %%posição 1 - coordenada x
-  %%posição 2- Força vertical
-  %%posição 3- Força Horizontal
+  %%posição 2- Força Horizontal
+  %%posição 3- Força vertical
   %%posição 4- Momento tensor
   %%posição 5- Torque
  

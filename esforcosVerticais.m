@@ -6,8 +6,8 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
 
   for i = 1:n_apoios
 	apoio = cell2mat(apoios{i});	
-    	if !isnan(apoio(2))
-       		vetorVerticais{end+1} = {apoio(2), apoio(1)};
+    	if !isnan(apoio(3))
+       		vetorVerticais{end+1} = {apoio(3), apoio(1)};
     	end
   end
 
@@ -39,8 +39,6 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
   
   Fv_hist = [Fv_hist 0];
   x_hist = [x_hist 0];
-   
-  vetorVerticais  
 
   for i = 1:nVerticais
     xm = vetorVerticais{i}{2};
@@ -49,12 +47,12 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
 
     # Busca se forca vertical vem de carregamento ou nao
     for j = 1:n_carregamentos
-	if((xm <= carregamentos{j}{2}) && (xm >= carregamentos{j}{1}))
+	if((xm < carregamentos{j}{2}) && (xm > carregamentos{j}{1}))
 		index_carregamento = j;
 		break;
 	end
     end
-    
+    	
     # Se for carregamento, realiza tratamento especifico
     if index_carregamento != 0	
       x0 = carregamentos{index_carregamento}{1};
@@ -66,17 +64,19 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
         cul = sumVertical - (polyval(int_poli, j) - polyval(int_poli, x0));
         Fv_hist = [Fv_hist cul];
       end
+      sumVertical -= res;
+    else
+      sumVertical -= res;
+      Fv_hist = [Fv_hist sumVertical];
+      x_hist = [x_hist xm];
     end
-
-    sumVertical -= res;
-    Fv_hist = [Fv_hist sumVertical];
-    x_hist = [x_hist xm];
   end
     
   Fv_hist = [Fv_hist sumVertical];
   x_hist = [x_hist L];
  
   [xs, ys] = stairs(x_hist, Fv_hist);
+  figure(3);
   plot(xs, ys)
 
 endfunction
