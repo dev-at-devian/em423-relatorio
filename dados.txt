@@ -59,6 +59,9 @@
 #
 # * Para elementos com direção e sentido, são considerados positivos os sentidos norte e leste, e negativos os sentidos sul e oeste
 
-viga altura 0 comprimento 9
-apoio tipo fixo posicao 9
-carregamento de 0 ate 9 coeficientes -160 0
+viga altura 0 comprimento 6
+apoio tipo pino posicao 1.5
+apoio tipo rolete posicao 4.5
+carregamento de 0 ate 1.5 coeficientes -6000
+carregamento de 1.5 ate 4.5 coeficientes -9000
+carregamento de 4.5 ate 6 coeficientes -3000
