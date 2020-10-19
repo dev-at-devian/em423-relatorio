@@ -53,3 +53,23 @@ esforcosVerticais(forcas_verticais_com_carregamentos, apoios, carregamentos, vig
  
 #esforcosMomentos (momentos_de_forcas, momentos, apoios, carregamentos, viga{1});
  
+printf("\nApós processamento:\n\n");
+
+printf("Viga:\n");
+disp(viga);
+printf("\nForças Verticais:\n");
+disp(forcas_verticais);
+printf("\nForças Horizontais:\n");
+disp(forcas_horizontais);
+printf("\nMomentos:\n");
+disp(momentos);
+printf("\nTorques:\n");
+disp(torques);
+printf("\nApoios:\n");
+disp(apoios);
+printf("\nCarregamentos:\n");
+disp(carregamentos);
+printf("\nForças Verticais+Carregamentos:\n");
+disp(forcas_verticais_com_carregamentos);
+printf("\nMomentos+Forças:\n");
+disp(momentos_com_carregamentos);

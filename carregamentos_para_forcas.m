@@ -21,7 +21,7 @@ function forcas = carregamentos_para_forcas(carregamentos)
     posicao_x = ans_int_polinomio_x / forca_modulo;
     
     # Agora temos a força completa: posição no eixo x e seu módulo
-    forca = {posicao_x, forca_modulo};
+    forca = {forca_modulo, posicao_x};
     # Adicionamos à matriz resposta
     forcas{end+1} = forca;
   endfor

@@ -36,8 +36,20 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
     apoio_x = apoio(1);
     apoio_reacoes = apoio(2:5);
     
+    # Verificamos se há reação horizontal
+    reacao_horizontal = apoio_reacoes(1);
+    if !isnan(reacao_horizontal)
+      # Se há reação horizontal, entrará apenas na somatória de forças
+      # horizontais
+      
+      # Como há uma incógnita, adicionamos ao número de incógnitas
+      # e utilizamos esse índice para representar essa reação
+      incognitaUtilizadas = incognitaUtilizadas + 1;
+      A(1, incognitaUtilizadas) = A(1, incognitaUtilizadas) + 1;
+    endif
+    
     # Verificamos se há reação vertical
-    reacao_vertical = apoio_reacoes(1);
+    reacao_vertical = apoio_reacoes(2);
     if !isnan(reacao_vertical)
       # Se há reação vertical, temos que incluí-la na matriz do sistema nas eqs.
       # de somatório de forças verticais iguais a zero e também na de momento
@@ -45,7 +57,7 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
       # Como há uma incógnita, adicionamos ao número de incógnitas
       # e utilizamos esse índice para representar essa reação
       incognitaUtilizadas = incognitaUtilizadas + 1;
-      A(1, incognitaUtilizadas) = A(1, incognitaUtilizadas) + 1;
+      A(2, incognitaUtilizadas) = A(2, incognitaUtilizadas) + 1;
       
       # Para cálculo do momento, não temos o coeficiente 1, mas sim o momento
       # da força, pois a soma de momentos de forças pontuais é no formato:
@@ -55,20 +67,6 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
       # ação será a posição de aplicação da força
       A(3, incognitaUtilizadas) = A(3, incognitaUtilizadas) + apoio_x;
     endif
-    
-    
-    # Verificamos se há reação horizontal
-    reacao_horizontal = apoio_reacoes(2);
-    if !isnan(reacao_horizontal)
-      # Se há reação horizontal, entrará apenas na somatória de forças
-      # horizontais
-      
-      # Como há uma incógnita, adicionamos ao número de incógnitas
-      # e utilizamos esse índice para representar essa reação
-      incognitaUtilizadas = incognitaUtilizadas + 1;
-      A(2, incognitaUtilizadas) = A(2, incognitaUtilizadas) + 1;
-    endif
-    
     
     # Verificamos se há reação de momento
     reacao_momento = apoio_reacoes(3);
@@ -82,7 +80,7 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
     endif
     
     
-    # Verificamos se há reação de momento
+    # Verificamos se há reação de torque
     reacao_torque = apoio_reacoes(4);
     if !isnan(reacao_torque)
       # Se há reação de torque, entrará na somatória de torques
@@ -105,34 +103,33 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   # valor numérico
   # F1 + F2 = V
   
-  # Para cada força vertical..
-  for i = 1:size(forcas_y, 2)
-    # Pegamos as informações da força
-    forca_x = forcas_y{i}{1};
-    forca_modulo = forcas_y{i}{2};
-    
-    # Invertemos o sinal e somamos à matriz B na equação de forças verticais
-    B(1) = B(1) - forca_modulo;
-  endfor
-  
-  
   # Para cada força horizontal...
   for i = 1:size(forcas_x, 2)
     # Pegamos as informações da força
-    forca_x = forcas_x{i}{2};
     forca_modulo = forcas_x{i}{1};
+    forca_x = forcas_x{i}{2};
     
     # Invertemos o sinal e somamos à matriz B na equação de forças horizontais
-    B(2) = B(2) - forca_modulo;
+    B(1) = B(1) - forca_modulo;
   endfor
   
+  # Para cada força vertical..
+  for i = 1:size(forcas_y, 2)
+    # Pegamos as informações da força
+    forca_modulo = forcas_y{i}{1};
+    forca_x = forcas_y{i}{2};
+    
+    # Invertemos o sinal e somamos à matriz B na equação de forças verticais
+    B(2) = B(2) - forca_modulo;
+    printf("lol %d\n", B(2));
+  endfor
   
   # Para cada momento...
-  nForcas = size(momentos, 1);
+  nForcas = size(momentos, 2);
   for i = 1:nForcas
     # Pegamos as informações da força
-    momento_x = momentos{i}{1};
-    momento_modulo = momentos{i}{2};
+    momento_modulo = momentos{i}{1};
+    momento_x = momentos{i}{2};
     
     # Invertemos o sinal e somamos à matriz B na equação de momentos
     B(3) = B(3) - momento_modulo;
@@ -142,8 +139,8 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   # Para cada momento...
   for i = 1:size(torques, 2)
     # Pegamos as informações da força
-    torque_x = torques{i}{2};
     torque_modulo = torques{i}{1};
+    torque_x = torques{i}{2};
     
     # Invertemos o sinal e somamos à matriz B na equação de torques
     B(4) = B(4) - torque_modulo;
@@ -152,6 +149,9 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   
   # Agora, finalmente, resolvemos o sistema
   x = linsolve(A, B);
+  disp(A);
+  disp(x);
+  disp(B);
   
   
   # Zeramos as incógnitas para determinar novamente o valor
