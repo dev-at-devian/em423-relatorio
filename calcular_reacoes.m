@@ -121,7 +121,6 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
     
     # Invertemos o sinal e somamos à matriz B na equação de forças verticais
     B(2) = B(2) - forca_modulo;
-    printf("lol %d\n", B(2));
   endfor
   
   # Para cada momento...
@@ -149,11 +148,7 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   
   # Agora, finalmente, resolvemos o sistema
   x = linsolve(A, B);
-  disp(A);
-  disp(x);
-  disp(B);
-  
-  
+    
   # Zeramos as incógnitas para determinar novamente o valor
   incognitaUtilizadas = 0;
   # Voltamos às reações de apoio
