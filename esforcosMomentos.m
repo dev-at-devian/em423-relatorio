@@ -105,6 +105,11 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
  
   [xs, ys] = stairs(x_hist, Fv_hist);
   figure(4);
-  plot(xs, ys);
+  plot(xs, ys, "linewidth", 2, "color", [0.682, 0.918, 0]);
+  grid on;
+  set(gca, "fontsize", 12);
+  title("Esforços Internos - Momento");
+  xlabel("x [m]");
+  ylabel("M [Nm]");
 
 endfunction

@@ -47,4 +47,11 @@ function retval = esforcosHorizontais (forcas_horizontais, apoios, L)
  
   [xs, ys] = stairs(x_hist, T_hist);
   figure(1);
-  plot(xs, ys);
+  plot(xs, ys, "linewidth", 2, "color", [1, 0.435, 0]);
+  grid on;
+  set(gca, "fontsize", 12);
+  title("Esforços Internos - Força Normal");
+  xlabel("x [m]");
+  ylabel("N(x) [N]");
+
+endfunction

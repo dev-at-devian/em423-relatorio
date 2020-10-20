@@ -77,6 +77,11 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
  
   [xs, ys] = stairs(x_hist, Fv_hist);
   figure(3);
-  plot(xs, ys)
+  plot(xs, ys, "linewidth", 2, "color", [1, 0.757, 0.027]);
+  grid on;
+  set(gca, "fontsize", 12);
+  title("Esforços Internos - Força Cortante");
+  xlabel("x [m]");
+  ylabel("V(x) [N]");
 
 endfunction

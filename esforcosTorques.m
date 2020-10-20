@@ -50,4 +50,11 @@ function retval = esforcosTorques (Torques, apoios, L)
  
   [xs, ys] = stairs(x_hist, T_hist);
   figure(2); 
-  plot(xs, ys)
+  plot(xs, ys, "linewidth", 2, "color", [1, 0.09, 0.016]);
+  grid on;
+  set(gca, "fontsize", 12);
+  title("Esforços Internos - Torque");
+  xlabel("x [m]");
+  ylabel("T [Nm]");
+
+endfunction
