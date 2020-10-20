@@ -63,7 +63,7 @@
 viga altura 0 comprimento 10
 apoio tipo pino posicao 1
 apoio tipo rolete posicao 9
-carregamento de 0 ate 2 coeficientes 12
-torque posicao 3 valor 8
+carregamento de 0 ate 2 coeficientes -12
+momento posicao 3 valor 8
 forca valor 10 vertical posicao 6
-carregamento de 7 ate 10 coeficientes -3 40
+carregamento de 7 ate 10 coeficientes 3 -40
