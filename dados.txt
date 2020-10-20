@@ -59,9 +59,11 @@
 #
 # * Para elementos com direção e sentido, são considerados positivos os sentidos norte e leste, e negativos os sentidos sul e oeste
 
-viga altura 0 comprimento 8
-apoio tipo pino posicao 0
-apoio tipo rolete posicao 8
-forca angulo 0 posicao 4 valor 10
-carregamento de 0 ate 4 coeficientes -1
-carregamento de 4 ate 8 coeficientes -3
+
+viga altura 0 comprimento 10
+apoio tipo pino posicao 1
+apoio tipo rolete posicao 9
+carregamento de 0 ate 2 coeficientes 12
+torque posicao 3 valor 8
+forca valor 10 vertical posicao 6
+carregamento de 7 ate 10 coeficientes -3 40

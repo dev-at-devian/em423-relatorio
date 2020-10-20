@@ -61,12 +61,12 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
       int_poli = polyint(polinomio);
       for j = x0:(x1 - x0)/100:x1
         x_hist = [x_hist j];
-        cul = sumVertical - (polyval(int_poli, j) - polyval(int_poli, x0));
+        cul = sumVertical + (polyval(int_poli, j) - polyval(int_poli, x0));
         Fv_hist = [Fv_hist cul];
       end
-      sumVertical -= res;
+      sumVertical += res;
     else
-      sumVertical -= res;
+      sumVertical += res;
       Fv_hist = [Fv_hist sumVertical];
       x_hist = [x_hist xm];
     end
