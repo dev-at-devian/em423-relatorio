@@ -8,7 +8,7 @@
 #
 #  - viga: Características da viga
 #
-#          Opções: altura [numero]      -> Altura da viga
+#          Opções: altura [numero]      -> Altura da viga (não implementado)
 #                  comprimento [numero] -> Comprimento da viga
 #
 #          Exemplos: viga comprimento 21
@@ -51,13 +51,13 @@
 #
 #  - carregamento: Carregamento distribuido aplicado entre dois pontos da viga
 #
-#          Opções: coeficientes [numero] ... [numero]   -> Coeficientes do polinômio que descreve o carregamento, em ordem crescente de grau
+#          Opções: coeficientes [numero] ... [numero]   -> Coeficientes do polinômio que descreve o carregamento, em ordem decrescente de grau
 #                  de [numero] ate [numero]             -> Posições inicial e final do carregamento no eixo x da viga
 #
 #          Exemplos: carregamento de 0 ate 2 coeficientes 1 6 4 12 6 75 123
 #                    carregamento coeficientes 9 9 3 12 87 24 8 1 8 0 2 de 1 ate 5
 #
-# * Para elementos com direção e sentido, são considerados positivos os sentidos norte e leste, e negativos os sentidos sul e oeste
+# * Para elementos com direção e sentido, são considerados positivos os sentidos para cima e para a direita, e negativos os sentidos para baixo e para a esquerda
 
 
 viga altura 0 comprimento 10
