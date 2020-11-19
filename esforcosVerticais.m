@@ -2,24 +2,24 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
   
 
   # Junta os apoios com reacao vertical ao conjunto forcas
-  n_apoios = size(apoios, 2);
+  n_apoios = length(apoios);
 
   for i = 1:n_apoios
-	apoio = cell2mat(apoios{i});	
-    	if !isnan(apoio(3))
-       		vetorVerticais{end+1} = {apoio(3), apoio(1)};
+	apoio = apoios{i};	
+    	if !isnan(apoio.vertical)
+       		vetorVerticais{end+1} = struct("value", apoio.vertical, "position",apoio.position);
     	end
   end
 
   # Sort forcas verticais baseado em sua posicao x
-  n_Verticais = size(vetorVerticais, 2);
+  n_Verticais = length(vetorVerticais);
 
   for i = 1:n_Verticais
-	smaller = vetorVerticais{i}{2};
+	smaller = vetorVerticais{i}.position;
         smaller_index = i;
 	for j = i:n_Verticais
-		if(vetorVerticais{j}{2} < smaller)
-			smaller = vetorVerticais{j}{2};
+		if(vetorVerticais{j}.position < smaller)
+			smaller = vetorVerticais{j}.position;
 			smaller_index = j;
 		end
 	end
@@ -30,24 +30,24 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
 
   % Forcas verticais
   
-  nVerticais = size(vetorVerticais, 2);
+  nVerticais = length(vetorVerticais);
   
   sumVertical = 0;
   x_hist = [];
   Fv_hist = [];
-  n_carregamentos = size(carregamentos, 2);
+  n_carregamentos = length(carregamentos);
   
   Fv_hist = [Fv_hist 0];
   x_hist = [x_hist 0];
 
   for i = 1:nVerticais
-    xm = vetorVerticais{i}{2};
-    res = vetorVerticais{i}{1};
+    xm = vetorVerticais{i}.position;
+    res = vetorVerticais{i}.value;
     index_carregamento = 0;
 
     # Busca se forca vertical vem de carregamento ou nao
     for j = 1:n_carregamentos
-	if((xm < carregamentos{j}{2}) && (xm > carregamentos{j}{1}))
+	if((xm < carregamentos{j}.end_position) && (xm > carregamentos{j}.start_position))
 		index_carregamento = j;
 		break;
 	end
@@ -55,9 +55,9 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
     	
     # Se for carregamento, realiza tratamento especifico
     if index_carregamento != 0	
-      x0 = carregamentos{index_carregamento}{1};
-      x1 = carregamentos{index_carregamento}{2};
-      polinomio = cell2mat(carregamentos{index_carregamento}{3}); 
+      x0 = carregamentos{index_carregamento}.start_position;
+      x1 = carregamentos{index_carregamento}.end_position;
+      polinomio = cell2mat(carregamentos{index_carregamento}.coefficients); 
       int_poli = polyint(polinomio);
       for j = x0:(x1 - x0)/100:x1
         x_hist = [x_hist j];

@@ -4,10 +4,10 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   
   # Passamos por cada apoio para verificar o número de reações que devemos
   # determinar no problema
-  for i = 1:size(apoios, 2)
-    apoio = cell2mat(apoios{i});
-    apoio_x = apoio(1);
-    apoio_reacoes = apoio(2:5);
+  for i = 1:length(apoios)
+    apoio = apoios{i};
+    apoio_x = apoio.position;
+    apoio_reacoes = [apoio.horizontal apoio.vertical apoio.momentum apoio.torque];
     
     # Para cada reação disponível no apoio, verificamos as que não são NaN
     # (NaN -- not a number -- representa reação indisponível)
@@ -31,10 +31,10 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   
   # Agora que sabemos o número de reações que temos, passamos por cada reação
   # para preencher o vetor que representa o nossos sitema linear
-  for i = 1:size(apoios, 2)
-    apoio = cell2mat(apoios{i});
-    apoio_x = apoio(1);
-    apoio_reacoes = apoio(2:5);
+  for i = 1:length(apoios)
+    apoio = apoios{i};
+    apoio_x = apoio.position;
+    apoio_reacoes = [apoio.horizontal apoio.vertical apoio.momentum apoio.torque];
     
     # Verificamos se há reação horizontal
     reacao_horizontal = apoio_reacoes(1);
@@ -104,31 +104,31 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   # F1 + F2 = V
   
   # Para cada força horizontal...
-  for i = 1:size(forcas_x, 2)
+  for i = 1:length(forcas_x)
     # Pegamos as informações da força
-    forca_modulo = forcas_x{i}{1};
-    forca_x = forcas_x{i}{2};
+    forca_modulo = forcas_x{i}.value;
+    forca_x = forcas_x{i}.position;
     
     # Invertemos o sinal e somamos à matriz B na equação de forças horizontais
     B(1) = B(1) - forca_modulo;
   endfor
   
   # Para cada força vertical..
-  for i = 1:size(forcas_y, 2)
+  for i = 1:length(forcas_y)
     # Pegamos as informações da força
-    forca_modulo = forcas_y{i}{1};
-    forca_x = forcas_y{i}{2};
+    forca_modulo = forcas_y{i}.value;
+    forca_x = forcas_y{i}.position;
     
     # Invertemos o sinal e somamos à matriz B na equação de forças verticais
     B(2) = B(2) - forca_modulo;
   endfor
   
   # Para cada momento...
-  nForcas = size(momentos, 2);
+  nForcas = length(momentos);
   for i = 1:nForcas
     # Pegamos as informações da força
-    momento_modulo = momentos{i}{1};
-    momento_x = momentos{i}{2};
+    momento_modulo = momentos{i}.value;
+    momento_x = momentos{i}.position;
     
     # Invertemos o sinal e somamos à matriz B na equação de momentos
     B(3) = B(3) - momento_modulo;
@@ -136,10 +136,10 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   
   
   # Para cada momento...
-  for i = 1:size(torques, 2)
+  for i = 1:length(torques)
     # Pegamos as informações da força
-    torque_modulo = torques{i}{1};
-    torque_x = torques{i}{2};
+    torque_modulo = torques{i}.value;
+    torque_x = torques{i}.position;
     
     # Invertemos o sinal e somamos à matriz B na equação de torques
     B(4) = B(4) - torque_modulo;
@@ -152,8 +152,8 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
   # Zeramos as incógnitas para determinar novamente o valor
   incognitaUtilizadas = 0;
   # Voltamos às reações de apoio
-  for i = 1:size(apoios, 2)
-    apoio = cell2mat(apoios{i});
+  for i = 1:length(apoios)
+    apoio = [apoios{i}.position apoios{i}.horizontal apoios{i}.vertical apoios{i}.momentum apoios{i}.torque];
     
     for j = 2:5
       # Verificamos se há reação
@@ -162,7 +162,7 @@ function apoios = calcular_reacoes(apoios, forcas_y, forcas_x, momentos, torques
         apoio(j) = x(incognitaUtilizadas);
       endif
     endfor
-    apoios{i} = {apoio(1), apoio(2), apoio(3), apoio(4), apoio(5)};
+    apoios{i} = struct("position", apoio(1), "horizontal", apoio(2), "vertical", apoio(3), "momentum", apoio(4), "torque", apoio(5));
   endfor
 endfunction
   

@@ -31,7 +31,7 @@ function out = parse_supports(tokens, line)
         i++;
     end
 
-    support = {position horizontal vertical momentum torque};
+    support = struct("position", position, "horizontal", horizontal, "vertical", vertical, "momentum", momentum, "torque", torque);
     apoios{end+1} = support;
 
 endfunction

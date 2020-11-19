@@ -12,7 +12,19 @@ function out = print_support_reactions()
             printf("-- Apoio %s\n", support_letter_upper);
 
             for j = 1:4
-                reaction_value = apoios{i}{j+1};
+                reaction_value = 0;
+                switch j
+                    case 1
+                        reaction_value = apoios{i}.horizontal;
+                    case 2
+                        reaction_value = apoios{i}.vertical;
+                    case 3
+                        reaction_value = apoios{i}.momentum;
+                    case 4
+                        reaction_value = apoios{i}.torque;
+                    otherwise
+                        error();
+                end
                 if !isnan(reaction_value)
                     sign_icon = " ";
                     if reaction_value > 0

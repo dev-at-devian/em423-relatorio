@@ -1,5 +1,6 @@
 function out = parse_torque(tokens, line) 
     global torques;
+    global singfun_torques;
     position = 0;
     value = 0;
     i = 2;
@@ -16,7 +17,8 @@ function out = parse_torque(tokens, line)
         end
         i++;
     end
-    torque = {value, position};
+    torque = struct("value", value, "position", position);
     torques{end+1} = torque;
+    singfun_torques{end+1} = singfun(-1, position, -value);
 
 endfunction

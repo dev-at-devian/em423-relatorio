@@ -17,7 +17,7 @@ function out = parse_beam(tokens, line)
         i++;
     end
 
-    viga{end+1} = width;
-    viga{end+1} = height;
+    viga.width = width;
+    viga.height = height;
 
 endfunction

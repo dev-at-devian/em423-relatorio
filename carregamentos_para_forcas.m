@@ -1,14 +1,13 @@
-
 function forcas = carregamentos_para_forcas(carregamentos)
   # Iniciamos o vetor de forças de carregamento
   forcas = [];
   
   # Para cada força...
-  for carregamento = 1:size(carregamentos, 2)
+  for carregamento = 1:length(carregamentos)
     # Pegamos as componentes do carregamento
-    x_inicio = carregamentos{carregamento}{1};
-    x_fim = carregamentos{carregamento}{2};
-    polinomio = cell2mat(carregamentos{carregamento}{3});
+    x_inicio = carregamentos{carregamento}.start_position;
+    x_fim = carregamentos{carregamento}.end_position;
+    polinomio = cell2mat(carregamentos{carregamento}.coefficients);
     
     # Precisamos integrar esse polinômio e avaliá-lo na posição final - inicial
     int_forca = polyint(polinomio);
@@ -21,7 +20,7 @@ function forcas = carregamentos_para_forcas(carregamentos)
     posicao_x = ans_int_polinomio_x / forca_modulo;
     
     # Agora temos a força completa: posição no eixo x e seu módulo
-    forca = {forca_modulo, posicao_x};
+    forca = struct("value", forca_modulo, "position", posicao_x);
     # Adicionamos à matriz resposta
     forcas{end+1} = forca;
   endfor

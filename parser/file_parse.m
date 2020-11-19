@@ -1,4 +1,5 @@
 function out = file_parse() 
+    global carregamentos;
     tokens = [];
     file_string = fileread("dados.txt");
     lines = strsplit(file_string, "\n");
@@ -28,7 +29,6 @@ function out = file_parse()
         end
         
     end
-
     fix_loads();
 
 endfunction

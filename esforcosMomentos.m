@@ -2,31 +2,31 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
   
 
   # Junta os apoios com reacao vertical ao conjunto forcas
-  n_apoios = size(apoios, 2);
+  n_apoios = length(apoios);
 
   for i = 1:n_apoios
-	apoio = cell2mat(apoios{i});	
-    	if !isnan(apoio(4))
-       		momentos{end+1} = {apoio(4), apoio(1)};
+	apoio = apoios{i};	
+    	if !isnan(apoio.momentum)
+       		momentos{end+1} = struct("value", apoio.momentum, "position", apoio.position);
     	end
-	if !isnan(apoio(3))
-		if(apoio(1) != 0)
-       			vetorMomentos{end+1} = {apoio(1) * apoio(3), apoio(1)};
+	if !isnan(apoio.vertical)
+		if(apoio.position != 0)
+       			vetorMomentos{end+1} = struct("value", (apoio.position * apoio.vertical), "position", apoio.position);
 		else
-			vetorMomentos{end+1} = {apoio(3), apoio(1)};
+			vetorMomentos{end+1} = struct("value", apoio.vertical, "position", apoio.position);
 		end			
     	end
   end
 
   # Sort Momentos baseado em sua posicao x
-  n_Momentos = size(vetorMomentos, 2);
+  n_Momentos = length(vetorMomentos);
 
   for i = 1:n_Momentos
-	smaller = vetorMomentos{i}{2};
+	smaller = vetorMomentos{i}.position;
         smaller_index = i;
 	for j = i:n_Momentos
-		if(vetorMomentos{j}{2} < smaller)
-			smaller = vetorMomentos{j}{2};
+		if(vetorMomentos{j}.position < smaller)
+			smaller = vetorMomentos{j}.position;
 			smaller_index = j;
 		end
 	end
@@ -35,18 +35,18 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
 	vetorMomentos{smaller_index} = swap;
   end
 
-  nMomentos = size(vetorMomentos, 2);
+  nMomentos = length(vetorMomentos);
 
   x_hist = [];
   Fv_hist = [];
-  n_carregamentos = size(carregamentos, 2);
-  n_momentos_puros = size(momentos, 2);
+  n_carregamentos = length(carregamentos);
+  n_momentos_puros = length(momentos);
 
   sum_puros = 0;
 
   # momentos puros
   for j = 1:n_momentos_puros
-	sum_puros -= momentos{j}{1};
+	sum_puros -= momentos{j}.value;
   end
   
   Fv_hist = [Fv_hist 0];
@@ -58,9 +58,9 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
 
     # Busca se posicao esta dentro de carregamento ou nao
     for j = 1:n_carregamentos
-	if((x < carregamentos{j}{2}) && (x > carregamentos{j}{1}))
+	if((x < carregamentos{j}.end_position) && (x > carregamentos{j}.start_position))
 		index_carregamento = j;
-                xi = carregamentos{j}{1};
+                xi = carregamentos{j}.start_position;
 		break;
 	end
     end
@@ -69,17 +69,17 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
     if index_carregamento != 0
 	 # momentos de forca
    	 for j = 1:nMomentos
-         	if xi >= vetorMomentos{j}{2}
-			if(vetorMomentos{j}{2} != 0)
-				res += (x - vetorMomentos{j}{2}) * vetorMomentos{j}{1} / vetorMomentos{j}{2};
+         	if xi >= vetorMomentos{j}.position
+			if(vetorMomentos{j}.position != 0)
+				res += (x - vetorMomentos{j}.position) * vetorMomentos{j}.value / vetorMomentos{j}.position;
 			else
-				res += (x - vetorMomentos{j}{2}) * vetorMomentos{j}{1};
+				res += (x - vetorMomentos{j}.position) * vetorMomentos{j}.value;
 			end
    		else
 			break;
 		end 
 	 end
-         polinomio = cell2mat(carregamentos{index_carregamento}{3}); 
+         polinomio = cell2mat(carregamentos{index_carregamento}.coefficients); 
          int_poli = polyint(polinomio);
          int_mom = polyint([polinomio 0]);
          res_forca = polyval(int_poli, x) - polyval(int_poli, xi);
@@ -88,11 +88,11 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
     else
  	 # momentos de forca
    	 for j = 1:nMomentos
-         	if x > vetorMomentos{j}{2}
-			if(vetorMomentos{j}{2} != 0)
-				res += (x - vetorMomentos{j}{2}) * vetorMomentos{j}{1} / vetorMomentos{j}{2};
+         	if x > vetorMomentos{j}.position
+			if(vetorMomentos{j}.position != 0)
+				res += (x - vetorMomentos{j}.position) * vetorMomentos{j}.value / vetorMomentos{j}.position;
 			else
-				res += (x - vetorMomentos{j}{2}) * vetorMomentos{j}{1};
+				res += (x - vetorMomentos{j}.position) * vetorMomentos{j}.value;
 			end
    		else
 			break;

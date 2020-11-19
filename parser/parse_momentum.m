@@ -1,5 +1,6 @@
 function out = parse_momentum(tokens, line) 
     global momentos;
+    global singfun_carregamentos;
     position = 0;
     value = 0;
     i = 2;
@@ -16,7 +17,8 @@ function out = parse_momentum(tokens, line)
         end
         i++;
     end
-    momentum = {value, position};
+    momentum = struct("value", value, "position", position);
     momentos{end+1} = momentum;
+    singfun_carregamentos{end+1} = singfun(-2, position, -value);
 
 endfunction

@@ -1,5 +1,6 @@
 function out = parse_load(tokens, line) 
     global carregamentos;
+    global singfun_carregamentos;
     start_position = 0;
     end_position = 0;
     coefficients = [];
@@ -38,7 +39,19 @@ function out = parse_load(tokens, line)
         end
         i++;
     end
-    load = {start_position, end_position, coefficients};
+    load = struct("start_position", start_position, "end_position", end_position, "coefficients", 1);
+    load.coefficients = coefficients;
     carregamentos{end+1} = load;
+    lc = length(coefficients);
+    for i = 1:lc
+        deg = lc-i;
+        if (coefficients{i} != 0)
+            s_end = singfun(deg, start_position, coefficients{i});
+            s_end = singfun_end(s_end, end_position);
+            for j = 1:length(s_end.functions)
+                singfun_carregamentos{end+1} = s_end{j};
+            end
+        end
+    end
 
 endfunction

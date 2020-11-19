@@ -5,28 +5,28 @@ function out = fix_loads()
     global apoios;
 
     for i = 1:length(apoios)
-        support_x = apoios{i}{1};
+        support_x = apoios{i}.position;
         for j = 1:length(carregamentos)
-            load_xi = carregamentos{j}{1};
-            load_xf = carregamentos{j}{2};
+            load_xi = carregamentos{j}.start_position;
+            load_xf = carregamentos{j}.end_position;
             if ((load_xi < support_x) && (support_x < load_xf))
                 carregamentos{end+1} = carregamentos{j};
-                carregamentos{j}{2} = support_x;
-                carregamentos{end}{1} = support_x;
+                carregamentos{j}.end_position = support_x;
+                carregamentos{end}.start_position = support_x;
             end
         end
 
     end
 
     for i = 1:length(forcas_verticais)
-        force_x = forcas_verticais{i}{2};
+        force_x = forcas_verticais{i}.position;
         for j = 1:length(carregamentos)
-            load_xi = carregamentos{j}{1};
-            load_xf = carregamentos{j}{2};
+            load_xi = carregamentos{j}.start_position;
+            load_xf = carregamentos{j}.end_position;
             if ((load_xi < force_x) && (force_x < load_xf))
                 carregamentos{end+1} = carregamentos{j};
-                carregamentos{j}{2} = force_x;
-                carregamentos{end}{1} = force_x;
+                carregamentos{j}.end_position = force_x;
+                carregamentos{end}.start_position = force_x;
             end
         end
 

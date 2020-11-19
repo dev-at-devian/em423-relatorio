@@ -11,7 +11,7 @@ global apoios = [];             # {posicao, horizontal, vertical, momento, torqu
 global momentos = [];           # {valor, posicao}
 global torques = [];            # {valor, posicao}
 global carregamentos = [];      # {posicao_inicio, posicao_fim, {coeficiente1,...,coeficienten}};
-global viga = [];               # {comprimento, altura}
+global viga = struct("width", 0, "height", 0);               # {comprimento, altura}
 
 
 # Obtemos as informações do problema contidas no arquivo dados.txt
@@ -29,15 +29,15 @@ momentos_com_carregamentos = [momentos, momentos_de_forcas];
 apoios = calcular_reacoes(apoios, forcas_verticais_com_carregamentos, forcas_horizontais, momentos_com_carregamentos, torques);
 
 # Plot das reaçoes internas na horizontal 
-esforcosHorizontais(forcas_horizontais, apoios, viga{1});
+esforcosHorizontais(forcas_horizontais, apoios, viga.width);
 
 # Plot das reaçoes internas para tensores 
-esforcosTorques(torques, apoios, viga{1});
+esforcosTorques(torques, apoios, viga.width);
 
 # Reacoes internas verticais
-esforcosVerticais(forcas_verticais_com_carregamentos, apoios, carregamentos, viga{1});
+esforcosVerticais(forcas_verticais_com_carregamentos, apoios, carregamentos, viga.width);
 
-esforcosMomentos (momentos_de_forcas, momentos, apoios, carregamentos, viga{1});
+esforcosMomentos (momentos_de_forcas, momentos, apoios, carregamentos, viga.width);
 
 # Mostramos as reações de apoio obtidas
 print_support_reactions();
