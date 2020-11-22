@@ -39,18 +39,28 @@ classdef singfunsum < handle
         function disp(s) 
             for i = 1:length(s.functions)
                 sf = s.functions{i};
-                if sf.multiplier == 1
-                    printf("⟨x-%d⟩^%d", sf.a, sf.degree);
-                else
-                    printf("%d*⟨x-%d⟩^%d", sf.multiplier, sf.a, sf.degree);
+                multip = sf.multiplier;
+                if i > 1
+                    if multip < 0
+                        printf(" - ");
+                    else
+                        printf(" + ");
+                    endif
+                    multip = abs(multip);
                 endif
-                if i < length(s.functions)
-                    printf(" + ");
+                if sf.multiplier == 1
+                    printf("<x-%d>^%d", sf.a, sf.degree);
+                else
+                    printf("%d*<x-%d>^%d", multip, sf.a, sf.degree);
                 endif
             endfor
             printf("\n");
         endfunction
         
+        function r = length(s)
+            r = length(s.functions);
+        endfunction
+
         function r = subsref(s,index) 
             switch index(1).type
                 case "()"
@@ -80,31 +90,60 @@ classdef singfunsum < handle
             endswitch
         endfunction
         
-        function mtimes(s, n) 
+        function r = mtimes(s, n) 
             if isa(s, "double")
-                for i = 1:length(n.functions)
-                    n.functions{i}.multiplier *= s;
+                r = copy(n);
+                for i = 1:length(r.functions)
+                    r.functions{i}.multiplier *= s;
                 endfor
             else
-                for i = 1:length(s.functions)
-                    s.functions{i}.multiplier *= n;
+                r = copy(s);
+                for i = 1:length(r.functions)
+                    r.functions{i}.multiplier *= n;
                 endfor
             endif
         endfunction
        
         function r = plus(s1, s2)
-            if ((isa(s1, "singfunsum")) && (isa(s2, "singfunsum")))
+            s1cp = copy(s1);
+            s2cp = copy(s2);
+            if ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
-                r.addfun(s1.functions);
-                r.addfun(s2.functions);
-            elseif ((isa(s1, "singfunsum")) && (isa(s2, "singfun")))
+                r.addfun(s1cp.functions);
+                r.addfun(s2cp.functions);
+            elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfun")))
                 r = singfunsum();
-                r.addfun(s1.functions);
-                r.addfun(s2);
-            elseif ((isa(s1, "singfun")) && (isa(s2, "singfunsum")))
+                r.addfun(s1cp.functions);
+                r.addfun(s2cp);
+            elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
-                r.addfun(s1);
-                r.addfun(s2.functions);
+                r.addfun(s1cp);
+                r.addfun(s2cp.functions);
+            endif
+        endfunction
+
+        function r = uminus(s) 
+            r = copy(s);
+            for i = 1:length(r.functions)
+                r.functions{i}.multiplier *= -1;
+            end
+        endfunction
+       
+        function r = minus(s1, s2)
+            s1cp = copy(s1);
+            s2cp = copy(s2);
+            if ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfunsum")))
+                r = singfunsum();
+                r.addfun(s1cp.functions);
+                r.addfun((-s2cp).functions);
+            elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfun")))
+                r = singfunsum();
+                r.addfun(s1cp.functions);
+                r.addfun((-s2cp));
+            elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "singfunsum")))
+                r = singfunsum();
+                r.addfun(s1cp);
+                r.addfun((-s2cp).functions);
             endif
         endfunction
 
@@ -117,7 +156,9 @@ classdef singfunsum < handle
 
         function s_copy = copy(s) 
             s_copy = singfunsum();
-            s_copy.addfun(s.functions);
+            for i = 1:length(s.functions)
+                s_copy.addfun(copy(s.functions{i}));
+            endfor
         endfunction
         
         function h = plot (s, rng, varargin)

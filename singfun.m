@@ -34,9 +34,9 @@ classdef singfun < handle
 
         function disp(s) 
             if s.multiplier == 1
-                printf("⟨x-%d⟩^%d\n", s.a, s.degree);
+                printf("<x-%d>^%d\n", s.a, s.degree);
             else
-                printf("%d*⟨x-%d⟩^%d\n", s.multiplier, s.a, s.degree);
+                printf("%d*<x-%d>^%d\n", s.multiplier, s.a, s.degree);
             endif
         endfunction
         
@@ -96,25 +96,50 @@ classdef singfun < handle
             endif
         endfunction
         
-        function mtimes(s, n) 
+        function r = mtimes(s, n) 
             if isa(s, "double")
-                n.multiplier *= s;
+                r = copy(n);
+                r.multiplier *= s;
             else
-                s.multiplier *= n;
+                r = copy(s);
+                r.multiplier *= n;
             endif
         endfunction
         
         function r = plus(s1, s2)
-            if ((isa(s1, "singfun")) && (isa(s2, "singfun")))
-                r = singfunsum(s1,s2);
-            elseif ((isa(s1, "singfunsum")) && (isa(s2, "singfun")))
+            s1cp = copy(s1);
+            s2cp = copy(s2);
+            if ((isa(s1cp, "singfun")) && (isa(s2cp, "singfun")))
+                r = singfunsum(s1cp,s2cp);
+            elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfun")))
                 r = singfunsum();
-                r.addfun(s1.functions);
-                r.addfun(s2);
-            elseif ((isa(s1, "singfun")) && (isa(s2, "singfunsum")))
+                r.addfun(s1cp.functions);
+                r.addfun(s2cp);
+            elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
-                r.addfun(s1);
-                r.addfun(s2.functions);
+                r.addfun(s1cp);
+                r.addfun(s2cp.functions);
+            endif
+        endfunction
+        
+        function r = uminus(s)
+            r = copy(s);
+            r.multiplier *= -1;
+        endfunction
+
+        function r = minus(s1, s2)
+            s1cp = copy(s1);
+            s2cp = copy(s2);
+            if ((isa(s1cp, "singfun")) && (isa(s2cp, "singfun")))
+                r = singfunsum(s1cp,-s2cp);
+            elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfun")))
+                r = singfunsum();
+                r.addfun(s1cp.functions);
+                r.addfun(-s2cp);
+            elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "singfunsum")))
+                r = singfunsum();
+                r.addfun(s1cp);
+                r.addfun((-s2cp).functions);
             endif
         endfunction
 
