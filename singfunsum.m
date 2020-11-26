@@ -21,6 +21,8 @@ classdef singfunsum < handle
 
     properties
         functions = {};
+        def_poly = [];
+        undef_poly = [];
     endproperties
     methods
         
@@ -36,7 +38,63 @@ classdef singfunsum < handle
             endif
         endfunction
 
+        function addpoly(s,poly)
+            if isa(poly, "double")
+                if length(poly) > 1
+                    if length(s.def_poly) >= length(poly)
+                        new_poly = zeros(1, (length(s.def_poly) - length(poly)));
+                        new_poly = [new_poly poly];
+                        s.def_poly = s.def_poly + new_poly;
+                    else
+                        new_poly = zeros(1, (length(poly) - length(s.def_poly)));
+                        new_poly = [new_poly s.def_poly];
+                        poly = poly + new_poly;
+                        s.def_poly = poly;
+                    endif
+                    elseif length(poly) == 1
+                    if length(s.def_poly) >= 1
+                        s.def_poly(end) += poly;
+                    else
+                        s.def_poly(1) = poly;
+                        s.undef_poly(1) = 0;
+                    end
+                endif
+            endif
+        endfunction
+
+        function setconst(s, index, value) 
+            const_index = 0;
+            for i = 1:length(s.undef_poly)
+                if isnan(s.undef_poly(i))
+                    if (++const_index) == index
+                        s.def_poly(i) += value;
+                        s.undef_poly(i) = 0;
+                    endif
+                endif
+            endfor
+        endfunction
+        
+        function r = defineconst(s, x_val, s_val)
+            x_sign = 0;
+            if length(x_val) > 1
+                x_sign = x_val(2);
+                x_val = x_val(1);
+            end
+            calc_val = subsref(s, struct("type", "()", "subs", {{x_val x_sign}}));
+            calc_val = s_val - (calc_val.def_poly);
+            r = calc_val;
+            setconst(s,1,calc_val);
+        endfunction
+
         function disp(s) 
+            hasFunctions = false;
+            hasDefPoly = false;
+            if length(s.functions) > 0
+                hasFunctions = true;
+            end
+            if length(find(s.def_poly)) > 0
+                hasDefPoly = true;
+            end
             for i = 1:length(s.functions)
                 sf = s.functions{i};
                 multip = sf.multiplier;
@@ -48,10 +106,49 @@ classdef singfunsum < handle
                     endif
                     multip = abs(multip);
                 endif
-                if sf.multiplier == 1
+                if multip == 1
                     printf("<x-%d>^%d", sf.a, sf.degree);
                 else
                     printf("%d*<x-%d>^%d", multip, sf.a, sf.degree);
+                endif
+            endfor
+            for i = 1:length(s.def_poly)
+                deg = length(s.def_poly)-i;
+                sp = s.def_poly(i);
+                multip = sp;
+                if multip != 0
+                    if (((i > 1) && (length(find(s.def_poly)) > 1)) || (hasFunctions))
+                        if multip < 0
+                            printf(" - ");
+                        else
+                            printf(" + ");
+                        endif
+                        multip = abs(multip);
+                    endif
+                    if deg == 0
+                        printf("%d", multip);
+                    else
+                        if multip == 1
+                            printf("x^%d", deg);
+                        else
+                            printf("%d*x^%d", multip, deg);
+                        endif
+                    endif
+                endif
+            endfor
+            used_consts = 0;
+            for i = 1:length(s.undef_poly)
+                deg = length(s.undef_poly)-i;
+                sp = s.undef_poly(i);
+                if ((isnan(sp)))
+                    if (((i > 1) && (length(find(s.undef_poly))) > 1) || (hasDefPoly) || (hasFunctions))
+                        printf(" + ");
+                    endif
+                    if deg == 0;
+                        printf("C%d", ++used_consts);
+                    else
+                        printf("C%d*x^%d", ++used_consts, deg);
+                    endif
                 endif
             endfor
             printf("\n");
@@ -73,16 +170,59 @@ classdef singfunsum < handle
                     for i = 1:length(s.functions)
                         r += s.functions{i}(x, x_sign);
                     endfor
+                    r += polyval(s.def_poly, x);
+                    if length(find(s.undef_poly)) > 0
+                        new_s = singfunsum();
+                        new_s.functions = {};
+                        new_s.def_poly = [r];
+                        new_s.undef_poly = s.undef_poly;
+                        r = new_s;
+                    end
                 case "{}"
-                    r = s.functions{index.subs{1}};
+                    nonzero_defpoly = find(s.def_poly);
+                    nonzero_undefpoly = find(s.undef_poly);
+                    s_func_len = length(s.functions);
+                    indx = index.subs{1};
+                    if indx <= s_func_len
+                        r = s.functions{indx};
+                    elseif indx <= (s_func_len+length(nonzero_defpoly))
+                        new_indx = indx - s_func_len;
+                        r = singfunsum();
+                        new_poly = zeros(1, length(s.def_poly));
+                        new_poly(nonzero_defpoly(new_indx)) = s.def_poly(new_indx);
+                        r.def_poly = new_poly;
+                        r.undef_poly = zeros(1,length(new_poly));
+                    elseif indx <= (s_func_len+length(nonzero_defpoly)+length(nonzero_undefpoly))
+                        new_indx = indx - s_func_len - length(nonzero_defpoly);
+                        r = singfunsum();
+                        new_poly = zeros(1, length(s.undef_poly));
+                        new_poly(nonzero_undefpoly(new_indx)) = s.undef_poly(nonzero_undefpoly(new_indx));
+                        r.def_poly = zeros(1,length(new_poly));
+                        r.undef_poly = new_poly;
+                    else
+                        error(sprintf("out of bound %d"), indx);
+                    endif
                 otherwise
                     switch index(1).subs
+                        case "setconst"
+                            f_args = index(2).subs;
+                            s.setconst(f_args{1}, f_args{2});
                         case "integrate"
-                            s.integrate();
+                            r = s.integrate();
+                        case "integrate_noconst"
+                            r = s.integrate();
+                        case "addfun"
+                            s.addfun(index(2).subs{1});
+                        case "addpoly"
+                            s.addpoly(index(2).subs{1});
                         case "copy"
-                            s.copy();
+                            r = s.copy();
                         case "functions"
                             r = s.functions;
+                        case "def_poly"
+                            r = s.def_poly;
+                        case "undef_poly"
+                            r = s.undef_poly;
                         otherwise
                             error("Method or attribute not found");        
                     endswitch
@@ -96,29 +236,51 @@ classdef singfunsum < handle
                 for i = 1:length(r.functions)
                     r.functions{i}.multiplier *= s;
                 endfor
+                for i = 1:length(r.def_poly)
+                    r.def_poly(i) *= s;
+                endfor
             else
                 r = copy(s);
                 for i = 1:length(r.functions)
                     r.functions{i}.multiplier *= n;
                 endfor
+                for i = 1:length(r.def_poly)
+                    r.def_poly(i) *= n;
+                endfor
             endif
         endfunction
        
         function r = plus(s1, s2)
-            s1cp = copy(s1);
-            s2cp = copy(s2);
+            s1cp = s1;
+            s2cp = s2;
+            if !isa(s1cp, "double")
+                s1cp = copy(s1);
+            endif
+            if !isa(s2cp, "double")
+                s2cp = copy(s2);
+            endif
             if ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
                 r.addfun(s1cp.functions);
                 r.addfun(s2cp.functions);
+                r.addpoly(s1cp.def_poly);
+                r.addpoly(s2cp.def_poly);
             elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfun")))
                 r = singfunsum();
                 r.addfun(s1cp.functions);
+                r.addpoly(s1cp.def_poly);
                 r.addfun(s2cp);
             elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
                 r.addfun(s1cp);
                 r.addfun(s2cp.functions);
+                r.addpoly(s2cp.def_poly);
+            elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "double")))
+                r = copy(s1cp);
+                r.addpoly(s2cp);
+            elseif ((isa(s1cp, "double")) && (isa(s2cp, "singfunsum")))
+                r = copy(s2cp);
+                r.addpoly(s1cp);
             endif
         endfunction
 
@@ -127,11 +289,20 @@ classdef singfunsum < handle
             for i = 1:length(r.functions)
                 r.functions{i}.multiplier *= -1;
             end
+            for i = 1:length(r.def_poly)
+                r.def_poly(i) *= -1;
+            end
         endfunction
        
         function r = minus(s1, s2)
-            s1cp = copy(s1);
-            s2cp = copy(s2);
+            s1cp = s1;
+            s2cp = s2;
+            if !isa(s1cp, "double")
+                s1cp = copy(s1);
+            endif
+            if !isa(s2cp, "double")
+                s2cp = copy(s2);
+            endif
             if ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
                 r.addfun(s1cp.functions);
@@ -139,18 +310,41 @@ classdef singfunsum < handle
             elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfun")))
                 r = singfunsum();
                 r.addfun(s1cp.functions);
+                r.addpoly(s1cp.def_poly);
                 r.addfun((-s2cp));
             elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
                 r.addfun(s1cp);
                 r.addfun((-s2cp).functions);
+                r.addpoly((-s2cp).def_poly);
+            elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "double")))
+                r = copy(s1cp);
+                r.addpoly(-s2cp);
+            elseif ((isa(s1cp, "double")) && (isa(s2cp, "singfunsum")))
+                r = copy(s2cp);
+                r.addpoly(-s1cp);
             endif
         endfunction
 
         function s_copy = integrate(s) 
             s_copy = copy(s);
             for i = 1:length(s_copy.functions)
-                s_copy.functions{i} = s_copy.functions{i}.integrate();
+                s_copy.functions{i} = s_copy.functions{i}.integrate_noconst();
+            endfor
+            if length(s_copy.undef_poly) == 0
+                s_copy.undef_poly(end+1) = NaN;
+                s_copy.def_poly(end+1) = 0;
+            else
+                s_copy.def_poly = polyint(s_copy.def_poly);
+                s_copy.undef_poly = polyint(s_copy.undef_poly);
+                s_copy.undef_poly(end) = NaN;
+            endif
+        endfunction
+
+        function s_copy = integrate_noconst(s) 
+            s_copy = copy(s);
+            for i = 1:length(s_copy.functions)
+                s_copy.functions{i} = s_copy.functions{i}.integrate_noconst();
             endfor
         endfunction
 
@@ -159,6 +353,8 @@ classdef singfunsum < handle
             for i = 1:length(s.functions)
                 s_copy.addfun(copy(s.functions{i}));
             endfor
+            s_copy.def_poly = s.def_poly;
+            s_copy.undef_poly = s.undef_poly;
         endfunction
         
         function h = plot (s, rng, varargin)

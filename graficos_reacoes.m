@@ -19,11 +19,11 @@ function graficos_reacoes(viga, singfun_carregamentos, singfun_forcas_x, singfun
         aux_t = aux_t + singfun_torques{i};  
     endfor
 
-    force_y = integrate(aux_fy);
-    momentum = integrate(force_y);
+    force_y = integrate_noconst(aux_fy);
+    momentum = integrate_noconst(force_y);
     
-    force_x = integrate(aux_fx);
-    torque = integrate(aux_t);
+    force_x = integrate_noconst(aux_fx);
+    torque = integrate_noconst(aux_t);
 
     figure(1);
     plot(force_x, [0, viga.width], "linewidth", 2, "color", [1, 0.435, 0]);

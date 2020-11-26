@@ -81,6 +81,8 @@ classdef singfun < handle
                      switch index(1).subs
                         case "integrate"
                             r = s.integrate();
+                        case "integrate_noconst"
+                            r = s.integrate_noconst();
                         case "copy"
                             r = s.copy();
                         case "degree"
@@ -107,18 +109,34 @@ classdef singfun < handle
         endfunction
         
         function r = plus(s1, s2)
-            s1cp = copy(s1);
-            s2cp = copy(s2);
+            s1cp = s1;
+            s2cp = s2;
+            if !isa(s1, "double")
+                s1cp = copy(s1);
+            endif
+            if !isa(s2, "double")
+                s2cp = copy(s2);
+            endif
             if ((isa(s1cp, "singfun")) && (isa(s2cp, "singfun")))
                 r = singfunsum(s1cp,s2cp);
             elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfun")))
                 r = singfunsum();
                 r.addfun(s1cp.functions);
+                r.addpoly(s1cp.def_poly);
                 r.addfun(s2cp);
             elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
                 r.addfun(s1cp);
                 r.addfun(s2cp.functions);
+                r.addpoly(s2cp.def_poly);
+            elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "double")))
+                r = singfunsum();
+                r.addfun(s1cp);
+                r.addpoly(s2cp);
+            elseif ((isa(s1cp, "double")) && (isa(s2cp, "singfun")))
+                r = singfunsum();
+                r.addfun(s2cp);
+                r.addpoly(s1cp);
             endif
         endfunction
         
@@ -128,22 +146,38 @@ classdef singfun < handle
         endfunction
 
         function r = minus(s1, s2)
-            s1cp = copy(s1);
-            s2cp = copy(s2);
+            s1cp = s1;
+            s2cp = s2;
+            if !isa(s1, "double")
+                s1cp = copy(s1);
+            endif
+            if !isa(s2, "double")
+                s2cp = copy(s2);
+            endif
             if ((isa(s1cp, "singfun")) && (isa(s2cp, "singfun")))
                 r = singfunsum(s1cp,-s2cp);
             elseif ((isa(s1cp, "singfunsum")) && (isa(s2cp, "singfun")))
                 r = singfunsum();
                 r.addfun(s1cp.functions);
+                r.addpoly(s1cp.def_poly);
                 r.addfun(-s2cp);
             elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "singfunsum")))
                 r = singfunsum();
                 r.addfun(s1cp);
                 r.addfun((-s2cp).functions);
+                r.addpoly((-s2cp).def_poly);
+            elseif ((isa(s1cp, "singfun")) && (isa(s2cp, "double")))
+                r = singfunsum();
+                r.addfun(s1cp);
+                r.addpoly(-s2cp);
+            elseif ((isa(s1cp, "double")) && (isa(s2cp, "singfun")))
+                r = singfunsum();
+                r.addfun(s2cp);
+                r.addpoly(-s1cp);
             endif
         endfunction
 
-        function s_copy = integrate(s) 
+        function s_copy = integrate_noconst(s) 
             s_copy = copy(s);
             switch s.degree
                 case 2
@@ -166,6 +200,16 @@ classdef singfun < handle
                         error("Function degree out of range");
                     endif
             endswitch
+        endfunction
+
+        function s_copy = integrate(s) 
+            tmp = copy(s);
+            tmp = integrate_noconst(tmp);
+            s_copy = singfunsum();
+            s_copy.addfun(tmp);
+            s_copy.def_poly(end+1) = 0;
+            s_copy.undef_poly(end+1) = NaN;
+            
         endfunction
 
         function s_copy = copy(s) 

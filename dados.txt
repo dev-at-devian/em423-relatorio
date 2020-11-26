@@ -60,7 +60,7 @@
 # * Para elementos com direção e sentido, são considerados positivos os sentidos para cima e para a direita, e negativos os sentidos para baixo e para a esquerda
 
 
-viga altura 0 comprimento 9
+viga altura 0 modulo elastico 235.13 modulo cisalhamento 134 comprimento 9
 apoio tipo pino posicao 0
 apoio tipo rolete posicao 9
 carregamento de 0 ate 4.5 coeficientes -1111.1111 0

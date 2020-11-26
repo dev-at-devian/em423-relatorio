@@ -50,8 +50,8 @@ function apoios = calcular_reacoes2()
       endfor
       for i = 1:length(carregamentoIncognitas)
           sf = singfun(-1, apoios{carregamentoIncognitas{i}.apoio}.position);
-          sf = integrate(sf);
-          sf2 = integrate(sf);
+          sf = integrate_noconst(sf);
+          sf2 = integrate_noconst(sf);
           incognitaUtilizadas++;
           A(1,incognitaUtilizadas) = sf(viga.width, 1);
           A(2,incognitaUtilizadas) = sf2(viga.width, 1);
@@ -60,8 +60,8 @@ function apoios = calcular_reacoes2()
           printf("igen %d resw %d\n", sf(viga.width,1), sf2(viga.width,1));
       endfor
       disp(somaLadoDireitoF);
-      somaLadoDireitoF = integrate(somaLadoDireitoF);
-      somaLadoDireitoM = integrate(somaLadoDireitoF);
+      somaLadoDireitoF = integrate_noconst(somaLadoDireitoF);
+      somaLadoDireitoM = integrate_noconst(somaLadoDireitoF);
       disp(somaLadoDireitoF);
       disp(somaLadoDireitoM);
       B(1) = -somaLadoDireitoF(viga.width,1);
@@ -75,12 +75,12 @@ function apoios = calcular_reacoes2()
       endfor
       for i = 1:length(forcaXIncognitas)
           sf = singfun(-1, apoios{forcaXIncognitas{i}.apoio}.position);
-          sf = integrate(sf);
+          sf = integrate_noconst(sf);
           incognitaUtilizadas++;
           A(3,incognitaUtilizadas) = sf(viga.width, 1);
           disp(sf);
       endfor
-      somaLadoDireito = integrate(somaLadoDireito);
+      somaLadoDireito = integrate_noconst(somaLadoDireito);
       B(3) = -somaLadoDireito(viga.width,1);
   endif
 
@@ -91,12 +91,12 @@ function apoios = calcular_reacoes2()
       endfor
       for i = 1:length(torqueIncognitas)
           sf = singfun(-1, apoios{torqueIncognitas{i}.apoio}.position);
-          sf = integrate(sf);
+          sf = integrate_noconst(sf);
           incognitaUtilizadas++;
           A(4,incognitaUtilizadas) = sf(viga.width, 1);
           disp(sf);
       endfor
-      somaLadoDireito = integrate(somaLadoDireito);
+      somaLadoDireito = integrate_noconst(somaLadoDireito);
       B(4) = -somaLadoDireito(viga.width,1);
   endif
   disp(A);

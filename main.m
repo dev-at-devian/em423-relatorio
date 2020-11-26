@@ -14,7 +14,13 @@ global carregamentos = {};         # { struct(start_position, end_position, coef
 global singfun_carregamentos = {}; # { singfun(degree,a,multiplier) }
 global singfun_forcas_x = {};      # { singfun(degree,a,multiplier) }
 global singfun_torques = {};       # { singfun(degree,a,multiplier) }
-global viga = struct("width", 0, "height", 0);
+
+# Viga:
+# - width: largura
+# - height altura
+# - elasticity: módulo de elasticidade
+# - shear: módulo de cisalhamento
+global viga = struct("width", 0, "height", 0, "elasticity", 0, "shear", 0);
 
 
 # Obtemos as informações do problema contidas no arquivo dados.txt
