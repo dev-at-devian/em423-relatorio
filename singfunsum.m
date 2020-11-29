@@ -1,22 +1,32 @@
-% singfunsum - Soma de funções de singularidade
-%
-% Uso :  = soma = singfun(funcao1, funcao2,...,funcaon);
-%          soma = funcao1 + funcao2 + ... + funcaon;
-%
-% Forma: k1*⟨x-a1⟩^n1 + k2*⟨x-a2⟩^n2 + ... + kn*⟨x-an⟩^nn
-%
-% Atributos:
-% - functions: funções que compõem a soma
-%
-% Métodos:
-% - soma(numero): retorna o valor da soma com o x dado
-% - soma{numero}: retorna a função presente no índice dado
-% - integrate(soma) / soma.integrate(): retorna a integral da soma (não modifica a original)
-% - copy(soma) / soma.copy(): retorna uma cópia da função (soma2 = soma torna ambas dependentes uma da outra)
-% - numero*soma / soma*numero: multiplica o multiplicador de cada função da soma pelo número dado
-% - soma + soma2: Retorna a combinação de ambas as somas
-% - soma + funcao / funcao + soma: Retorna a soma das funções da primeira soma mais a função dada
-% - plot(variavel, [inicio fim], ... ): plota o gráfico da soma no intervalo dado
+# singfunsum - Soma de funções de singularidade
+#
+# Uso :  = soma = singfun(funcao1, funcao2,...,funcaon);
+#          soma = funcao1 + funcao2 + ... + funcaon;
+#
+# Forma: k1*⟨x-a1⟩^n1 + k2*⟨x-a2⟩^n2 + ... + kn*⟨x-an⟩^nn
+#
+# Atributos:
+# - functions: funções que compõem a soma
+# - def_poly: coeficientes do polinômio gerado pelas constantes definidas durante integrações
+# - undef_poly: coeficientes do polinômio gerado pelas constantes ainda indefinidas durante integrações
+#
+# Métodos:
+# - soma(numero): retorna o valor da soma com o x dado
+# - soma{numero}: retorna a função presente no índice dado
+# - integrate_noconst(soma) / soma.integrate_noconst(): retorna um singfunsum contendo a integral sem constantes de cada função da soma original
+# - integrate(soma) / soma.integrate(): retorna a integral da soma + uma constante indefinida
+# - setconst(soma,índice,valor) / soma.setconst(índice,valor): Define a constante do índice dado com o valor dado
+# - defineconst(soma,valor_x,valor_y) / soma.defineconst(valor_x,valor_y): Se houver apenas uma constante, calcula e define seu valor com base no ponto soma(x/x+/x-) = y conhecido.
+# - copy(soma) / soma.copy(): retorna uma cópia da função (soma2 = soma torna ambas dependentes uma da outra)
+# - numero*soma / soma*numero: multiplica o multiplicador de cada função da soma pelo número dado
+# - -soma: multiplica o multiplicador de cada função da soma por -1
+# - soma + soma2: Retorna a combinação de ambas as somas
+# - soma - soma2: Retorna a combinação da primeira soma e da negativa da segunda
+# - soma + funcao / funcao + soma: Retorna a soma das funções da primeira soma mais a função dada
+# - soma - funcao / funcao - soma: Retorna a soma das funções da primeira soma mais a negativa da função dada, e vice-versa
+# - length(soma): retorna o número de termos da soma, incluindo coeficientes dos polinômios definidos e indefinidos não-nulos
+# - plot(soma, [inicio fim], ... ): plota o gráfico da soma no intervalo dado
+
 classdef singfunsum < handle
 
     properties
@@ -28,6 +38,8 @@ classdef singfunsum < handle
         
         function s = singfunsum(varargin) 
             s.functions = varargin;
+            s.def_poly = [];
+            s.undef_poly = [];
         endfunction
 
         function r = addfun(s,func) 
@@ -62,13 +74,14 @@ classdef singfunsum < handle
             endif
         endfunction
 
-        function setconst(s, index, value) 
+        function r = setconst(s, index, value) 
             const_index = 0;
             for i = 1:length(s.undef_poly)
                 if isnan(s.undef_poly(i))
                     if (++const_index) == index
                         s.def_poly(i) += value;
                         s.undef_poly(i) = 0;
+                        r = value;
                     endif
                 endif
             endfor
@@ -155,7 +168,7 @@ classdef singfunsum < handle
         endfunction
         
         function r = length(s)
-            r = length(s.functions);
+            r = length(s.functions) + length(find(s.def_poly)) + length(find(s.undef_poly));
         endfunction
 
         function r = subsref(s,index) 

@@ -1,7 +1,7 @@
-function out = file_parse() 
+function out = file_parse(file_path) 
     global carregamentos;
     tokens = [];
-    file_string = fileread("dados.txt");
+    file_string = fileread(file_path);
     lines = strsplit(file_string, "\n");
     for i = 1:(length(lines)-1)
         line_tokens = strsplit(lines(i){:}, " ");

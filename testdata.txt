@@ -1,0 +1,67 @@
+# Arquivo de descrição do problema
+#
+# Sintaxe:
+#
+# [elemento] [opcao1] [valor1] [opcao2] [valor2] ... [opcaon] [valorn]
+#
+# Elementos:
+#
+#  - viga: Características da viga
+#
+#          Opções: altura [numero]      -> Altura da viga (não implementado)
+#                  comprimento [numero] -> Comprimento da viga
+#
+#          Exemplos: viga comprimento 21
+#                    viga altura 0.41 comprimento 5
+#
+#  - forca: Força aplicada na viga
+#
+#          Opções: valor [numero]   -> Módulo da força, com sinal indicando o sentido*
+#                  vertical         -> Indica que a força é aplicada na direção vertical
+#                  horizontal       -> Indica que a força é aplicada na direção horizontal
+#                  posicao [numero] -> Posição da força no eixo x da viga
+#                  angulo [numero]  -> Ângulo com o vetor apontando no sentido horizontal positivo*
+#
+#          Exemplos: forca valor 10 horizontal posicao 2
+#                    forca angulo 45 posicao 15 valor 12.1346
+#
+#  - apoio: Apoio colocado na viga
+#
+#          Opções: tipo [fixo/pino/rolete]   -> Tipo de apoio
+#                  posicao [numero]          -> Posição do apoio no eixo x da viga
+#
+#          Exemplos: apoio posicao 2 tipo rolete
+#                    apoio tipo fixo
+#
+#  - momento: Momento aplicado no eixo z da viga
+#
+#          Opções: valor [numero]   -> Valor do momento
+#                  posicao [numero] -> Posição do momento no eixo x da viga
+#
+#          Exemplos: momento valor 9.31
+#                    momento posicao 61.413 valor 314
+#
+#  - torque: Torque aplicado na viga
+#
+#          Opções: valor [numero]   -> Valor do torque
+#                  posicao [numero] -> Posição do torque no eixo x da viga
+#
+#          Exemplos: torque posicao 0 valor 763.12
+#                    torque valor 1
+#
+#  - carregamento: Carregamento distribuido aplicado entre dois pontos da viga
+#
+#          Opções: coeficientes [numero] ... [numero]   -> Coeficientes do polinômio que descreve o carregamento, em ordem decrescente de grau
+#                  de [numero] ate [numero]             -> Posições inicial e final do carregamento no eixo x da viga
+#
+#          Exemplos: carregamento de 0 ate 2 coeficientes 1 6 4 12 6 75 123
+#                    carregamento coeficientes 9 9 3 12 87 24 8 1 8 0 2 de 1 ate 5
+#
+# * Para elementos com direção e sentido, são considerados positivos os sentidos para cima e para a direita, e negativos os sentidos para baixo e para a esquerda
+
+
+viga raio externo 12 tipo oco comprimento 11 raio interno 5
+apoio tipo pino posicao 0
+apoio tipo rolete posicao 9
+carregamento de 0 ate 4.5 coeficientes -1111.1111 0
+carregamento de 4.5 ate 9 coeficientes -1111.1111 0

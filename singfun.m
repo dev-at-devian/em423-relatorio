@@ -1,21 +1,23 @@
-% singfun - Função de singularidade
-%
-% Uso : funcao = singfun(grau, posicao, multiplicador (opcional));
-%
-% Forma: k*⟨x-a⟩^n
-%
-% Atributos:
-% - degree: grau da função (n)
-% - a: posicao da função (a)
-% - multiplier: multiplicador da função (k)
-%
-% Métodos:
-% - funcao(numero): retorna o valor da função com o x dado
-% - integrate(funcao) / funcao.integrate(): retorna a integral da função (não modifica a original)
-% - copy(variável) / funcao.copy(): retorna uma cópia da função (funcao2 = funcao torna ambas dependentes uma da outra)
-% - numero*funcao / funcao*numero: multiplica o multiplicador da função pelo número dado
-% - funcao + funcao2: retorna um objeto do tipo singfunsum (soma de funções de singularidade) contendo ambas as funções
-% - plot(funcao, [inicio fim], ... ): plota o gráfico da função no intervalo dado
+# singfun - Função de singularidade
+#
+# Uso : funcao = singfun(grau, posicao, multiplicador (opcional));
+#
+# Forma: k*⟨x-a⟩^n
+#
+# Atributos:
+# - degree: grau da função (n)
+# - a: posicao da função (a)
+# - multiplier: multiplicador da função (k)
+#
+# Métodos:
+# - funcao(numero): retorna o valor da função com o x dado
+# - integrate_noconst(funcao) / funcao.integrate_noconst(): retorna a integral da função sem constantes (retorna um objeto do tipo singfun)
+# - integrate(funcao) / funcao.integrate(): retorna a integral da função e soma uma constante indefinida (retorna um objeto do tipo singfunsum)
+# - copy(variável) / funcao.copy(): retorna uma cópia da função (funcao2 = funcao torna ambas dependentes uma da outra)
+# - numero*funcao / funcao*numero: multiplica o multiplicador da função pelo número dado
+# - funcao + funcao2: retorna um objeto do tipo singfunsum (soma de funções de singularidade) contendo ambas as funções
+# - funcao - funcao2: retorna um objeto do tipo singfunsum (soma de funções de singularidade) contendo a primeira função e a negativa da segunda
+# - plot(funcao, [inicio fim], ... ): plota o gráfico da função no intervalo dado
 
 classdef singfun < handle
 

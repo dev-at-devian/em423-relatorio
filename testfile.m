@@ -1,18 +1,21 @@
-v = singfun(1,0,3) + singfun(1,5,-3) + singfun(0,5,-15);
-w = singfun(2,0,3);
-w = singfun(2,0,3);
-w = singfun(2,0,3) + singfun(0,5,-w(5));
-w = w + singfun(2,5,-3);
-aux = ((singfun(2,0,3)+singfun(2,5,-3)));
-w = w + singfun(1,5, -(aux(6) - aux(5)));
+clc
+clear all
+format long
 
-x = singfun(3,0,3);
-x = x + singfun(3,5,-3);
-aux = singfun(3,0,3) + singfun(3,5,-3);
-x = x + singfun(1,5,-(aux(6)-aux(5)));
+addpath("parser");
+addpath("printer");
 
-kar = singfun(2,3,5);
-kar = singfun_end(kar, 5);
+global forcas_verticais = {};      # { struct(value, position) }
+global forcas_horizontais = {};    # { struct(value, position) }
+global apoios = {};                # { struct(position, horizontal, vertical, momentum, torque) }
+global momentos = {};              # { struct(value, position) }
+global torques = {};               # { struct(value, position) }
+global carregamentos = {};         # { struct(start_position, end_position, coefficients) }
+global singfun_carregamentos = {}; # { singfun(degree,a,multiplier) }
+global singfun_forcas_x = {};      # { singfun(degree,a,multiplier) }
+global singfun_torques = {};       # { singfun(degree,a,multiplier) }
+global viga = struct();
 
-plot(kar,[0,10]);
 
+# Obtemos as informações do problema contidas no arquivo dados.txt
+file_parse("testdata.txt"); 
