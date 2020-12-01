@@ -1,27 +1,27 @@
-function graficos_reacoes(viga, singfun_carregamentos, singfun_forcas_x, singfun_torques) 
-    aux_fy = singfunsum();  
-    force_y = singfunsum();  
-    momentum = singfunsum();  
+function graficos_reacoes(viga, singfun_carregamentos, singfun_forcas_x, singfun_torques)
+    aux_fy = singfunsum();
+    force_y = singfunsum();
+    momentum = singfunsum();
 
-    aux_fx = singfunsum();  
-    force_x = singfunsum();  
+    aux_fx = singfunsum();
+    force_x = singfunsum();
 
-    aux_t = singfunsum();  
-    torque = singfunsum();  
+    aux_t = singfunsum();
+    torque = singfunsum();
 
     for i = 1:length(singfun_carregamentos)
-        aux_fy = aux_fy + singfun_carregamentos{i};  
+        aux_fy = aux_fy + singfun_carregamentos{i};
     endfor
     for i = 1:length(singfun_forcas_x)
-        aux_fx = aux_fx + singfun_forcas_x{i};  
+        aux_fx = aux_fx + singfun_forcas_x{i};
     endfor
     for i = 1:length(singfun_torques)
-        aux_t = aux_t + singfun_torques{i};  
+        aux_t = aux_t + singfun_torques{i};
     endfor
 
     force_y = integrate_noconst(aux_fy);
     momentum = integrate_noconst(force_y);
-    
+
     force_x = integrate_noconst(aux_fx);
     torque = integrate_noconst(aux_t);
 

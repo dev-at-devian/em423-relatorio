@@ -27,22 +27,22 @@ classdef singfun < handle
         multiplier = 1;
     endproperties
     methods
-        
-        function s = singfun(degree, a, multiplier=1) 
+
+        function s = singfun(degree, a, multiplier=1)
             s.degree = degree;
             s.a = a;
             s.multiplier = multiplier;
         endfunction
 
-        function disp(s) 
+        function disp(s)
             if s.multiplier == 1
                 printf("<x-%d>^%d\n", s.a, s.degree);
             else
                 printf("%d*<x-%d>^%d\n", s.multiplier, s.a, s.degree);
             endif
         endfunction
-        
-        function r = subsref(s,index) 
+
+        function r = subsref(s,index)
             if (index(1).type == "()") || (index(1).type == "{}")
                x = index(1).subs{1};
                x_sign = 0;
@@ -96,11 +96,11 @@ classdef singfun < handle
                         otherwise
                             disp(index(1).subs);
                             error("Method or attribute not found");
-                    endswitch               
+                    endswitch
             endif
         endfunction
-        
-        function r = mtimes(s, n) 
+
+        function r = mtimes(s, n)
             if isa(s, "double")
                 r = copy(n);
                 r.multiplier *= s;
@@ -109,7 +109,7 @@ classdef singfun < handle
                 r.multiplier *= n;
             endif
         endfunction
-        
+
         function r = plus(s1, s2)
             s1cp = s1;
             s2cp = s2;
@@ -141,7 +141,7 @@ classdef singfun < handle
                 r.addpoly(s1cp);
             endif
         endfunction
-        
+
         function r = uminus(s)
             r = copy(s);
             r.multiplier *= -1;
@@ -179,7 +179,7 @@ classdef singfun < handle
             endif
         endfunction
 
-        function s_copy = integrate_noconst(s) 
+        function s_copy = integrate_noconst(s)
             s_copy = copy(s);
             switch s.degree
                 case 2
@@ -204,20 +204,20 @@ classdef singfun < handle
             endswitch
         endfunction
 
-        function s_copy = integrate(s) 
+        function s_copy = integrate(s)
             tmp = copy(s);
             tmp = integrate_noconst(tmp);
             s_copy = singfunsum();
             s_copy.addfun(tmp);
             s_copy.def_poly(end+1) = 0;
             s_copy.undef_poly(end+1) = NaN;
-            
+
         endfunction
 
-        function s_copy = copy(s) 
+        function s_copy = copy(s)
             s_copy = singfun(s.degree, s.a, s.multiplier);
         endfunction
-        
+
         function h = plot (s, rng, varargin)
             x = [rng(1) : ((rng(2)-rng(1))/100) : rng(2)];
             y = [];

@@ -1,4 +1,4 @@
-function out = parse_beam(tokens, line) 
+function out = parse_beam(tokens, line)
     global viga;
     type = "bar";
     width = 0;
@@ -63,21 +63,21 @@ function out = parse_beam(tokens, line)
         end
         i++;
     end
-    
+
     switch type
-        case "bar" 
+        case "bar"
             area = length_z*height;
             volume = area*width;
             Iz = (length_z*(height^3))/12;
             Iy = (height*(length_z^3))/12;
             Ip = Iz+Iy;
-        case "cylinder" 
+        case "cylinder"
             area = pi*(radius^2);
             volume = area*width;
             Iz = (pi*((2*radius)^4))/64;
             Iy = Iz;
             Ip = Iz+Iy;
-        case "hollow" 
+        case "hollow"
             area = (pi*(outer_radius^2)) - (pi*(inner_radius^2));
             volume = area*width;
             Iz = (pi*(((2*outer_radius)^4)-((2*inner_radius)^4)))/64;

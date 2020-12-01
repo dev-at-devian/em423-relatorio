@@ -1,4 +1,4 @@
-function out = file_parse(file_path) 
+function out = file_parse(file_path)
     global carregamentos;
     tokens = [];
     file_string = fileread(file_path);
@@ -27,7 +27,7 @@ function out = file_parse(file_path)
             otherwise
                 error("Erro (linha %d, coluna %d): Comando '%s' inválido", i, 1, tokens{i}{1});
         end
-        
+
     end
     fix_loads();
 

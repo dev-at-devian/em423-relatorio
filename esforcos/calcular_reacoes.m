@@ -1,4 +1,4 @@
-function apoios = calcular_reacoes2()
+function apoios = calcular_reacoes()
   global viga;
   global apoios;
   global singfun_carregamentos;
@@ -8,14 +8,14 @@ function apoios = calcular_reacoes2()
   carregamentoIncognitas = {};
   forcaXIncognitas = {};
   torqueIncognitas = {};
-  
+
   # Passamos por cada apoio para verificar o número de reações que devemos
   # determinar no problema
   for i = 1:length(apoios)
     apoio = apoios{i};
     apoio_x = apoio.position;
     apoio_reacoes = [apoio.horizontal apoio.vertical apoio.momentum apoio.torque];
-    
+
     # Para cada reação disponível no apoio, verificamos as que não são NaN
     # (NaN -- not a number -- representa reação indisponível)
     for j = 1:4
@@ -36,7 +36,7 @@ function apoios = calcular_reacoes2()
       endif
     endfor
   endfor
-  
+
   A = zeros(4, nIncognitas);
   B = zeros(4, 1);
   incognitaUtilizadas = 0;

@@ -1,4 +1,4 @@
-function out = parse_load(tokens, line) 
+function out = parse_load(tokens, line)
     global carregamentos;
     global singfun_carregamentos;
     start_position = 0;
@@ -9,7 +9,7 @@ function out = parse_load(tokens, line)
         switch tokens{i}
             case "#"
                 i = length(tokens);
-            case "de" 
+            case "de"
                 start_position = str2num(tokens{++i});
                 if strcmp(tokens{++i}, "ate")
                     end_position = str2num(tokens{++i});

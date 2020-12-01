@@ -1,6 +1,6 @@
-function out = print_support_reactions() 
+function out = print_support_reactions()
     global apoios;
-        
+
         printf("\nReações de apoio:\n\n");
         for i = 1:length(apoios)
             sign_icons = {" (→) "," (←) "," (↑) "," (↓) "," (↺) "," (↻) "," (↠) "," (↞) "};

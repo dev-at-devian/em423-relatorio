@@ -35,14 +35,14 @@ classdef singfunsum < handle
         undef_poly = [];
     endproperties
     methods
-        
-        function s = singfunsum(varargin) 
+
+        function s = singfunsum(varargin)
             s.functions = varargin;
             s.def_poly = [];
             s.undef_poly = [];
         endfunction
 
-        function r = addfun(s,func) 
+        function r = addfun(s,func)
             if isa(func, "cell")
                 s.functions = [s.functions, func];
             elseif isa(func, "singfun");
@@ -74,7 +74,7 @@ classdef singfunsum < handle
             endif
         endfunction
 
-        function r = setconst(s, index, value) 
+        function r = setconst(s, index, value)
             const_index = 0;
             for i = 1:length(s.undef_poly)
                 if isnan(s.undef_poly(i))
@@ -86,7 +86,7 @@ classdef singfunsum < handle
                 endif
             endfor
         endfunction
-        
+
         function r = defineconst(s, x_val, s_val)
             x_sign = 0;
             if length(x_val) > 1
@@ -99,7 +99,7 @@ classdef singfunsum < handle
             setconst(s,1,calc_val);
         endfunction
 
-        function disp(s) 
+        function disp(s)
             hasFunctions = false;
             hasDefPoly = false;
             if length(s.functions) > 0
@@ -166,12 +166,12 @@ classdef singfunsum < handle
             endfor
             printf("\n");
         endfunction
-        
+
         function r = length(s)
             r = length(s.functions) + length(find(s.def_poly)) + length(find(s.undef_poly));
         endfunction
 
-        function r = subsref(s,index) 
+        function r = subsref(s,index)
             switch index(1).type
                 case "()"
                     x = index(1).subs{1};
@@ -237,13 +237,13 @@ classdef singfunsum < handle
                         case "undef_poly"
                             r = s.undef_poly;
                         otherwise
-                            error("Method or attribute not found");        
+                            error("Method or attribute not found");
                     endswitch
-                    
+
             endswitch
         endfunction
-        
-        function r = mtimes(s, n) 
+
+        function r = mtimes(s, n)
             if isa(s, "double")
                 r = copy(n);
                 for i = 1:length(r.functions)
@@ -262,7 +262,7 @@ classdef singfunsum < handle
                 endfor
             endif
         endfunction
-       
+
         function r = plus(s1, s2)
             s1cp = s1;
             s2cp = s2;
@@ -297,7 +297,7 @@ classdef singfunsum < handle
             endif
         endfunction
 
-        function r = uminus(s) 
+        function r = uminus(s)
             r = copy(s);
             for i = 1:length(r.functions)
                 r.functions{i}.multiplier *= -1;
@@ -306,7 +306,7 @@ classdef singfunsum < handle
                 r.def_poly(i) *= -1;
             end
         endfunction
-       
+
         function r = minus(s1, s2)
             s1cp = s1;
             s2cp = s2;
@@ -339,7 +339,7 @@ classdef singfunsum < handle
             endif
         endfunction
 
-        function s_copy = integrate(s) 
+        function s_copy = integrate(s)
             s_copy = copy(s);
             for i = 1:length(s_copy.functions)
                 s_copy.functions{i} = s_copy.functions{i}.integrate_noconst();
@@ -354,14 +354,14 @@ classdef singfunsum < handle
             endif
         endfunction
 
-        function s_copy = integrate_noconst(s) 
+        function s_copy = integrate_noconst(s)
             s_copy = copy(s);
             for i = 1:length(s_copy.functions)
                 s_copy.functions{i} = s_copy.functions{i}.integrate_noconst();
             endfor
         endfunction
 
-        function s_copy = copy(s) 
+        function s_copy = copy(s)
             s_copy = singfunsum();
             for i = 1:length(s.functions)
                 s_copy.addfun(copy(s.functions{i}));
@@ -369,7 +369,7 @@ classdef singfunsum < handle
             s_copy.def_poly = s.def_poly;
             s_copy.undef_poly = s.undef_poly;
         endfunction
-        
+
         function h = plot (s, rng, varargin)
             x = [rng(1) : ((rng(2)-rng(1))/100) : rng(2)];
             y = [];

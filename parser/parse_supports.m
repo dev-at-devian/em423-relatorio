@@ -1,4 +1,4 @@
-function out = parse_supports(tokens, line) 
+function out = parse_supports(tokens, line)
     global apoios;
     position = 0;
     horizontal = NaN;
@@ -26,7 +26,7 @@ function out = parse_supports(tokens, line)
                 position = str2num(tokens{++i});
             otherwise
                 error("Erro (linha %d, coluna %d): Comando '%s' inválido", line, i, tokens{i});
-                
+
         end
         i++;
     end

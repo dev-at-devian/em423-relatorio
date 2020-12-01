@@ -1,11 +1,11 @@
 function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregamentos, L)
-  
+
 
   # Junta os apoios com reacao vertical ao conjunto forcas
   n_apoios = length(apoios);
 
   for i = 1:n_apoios
-	apoio = apoios{i};	
+	apoio = apoios{i};
     	if !isnan(apoio.momentum)
        		momentos{end+1} = struct("value", apoio.momentum, "position", apoio.position);
     	end
@@ -14,7 +14,7 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
        			vetorMomentos{end+1} = struct("value", (apoio.position * apoio.vertical), "position", apoio.position);
 		else
 			vetorMomentos{end+1} = struct("value", apoio.vertical, "position", apoio.position);
-		end			
+		end
     	end
   end
 
@@ -48,7 +48,7 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
   for j = 1:n_momentos_puros
 	sum_puros -= momentos{j}.value;
   end
-  
+
   Fv_hist = [Fv_hist 0];
   x_hist = [x_hist 0];
 
@@ -64,7 +64,7 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
 		break;
 	end
     end
-    
+
     # Se for carregamento, realiza tratamento especifico
     if index_carregamento != 0
 	 # momentos de forca
@@ -77,9 +77,9 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
 			end
    		else
 			break;
-		end 
+		end
 	 end
-         polinomio = cell2mat(carregamentos{index_carregamento}.coefficients); 
+         polinomio = cell2mat(carregamentos{index_carregamento}.coefficients);
          int_poli = polyint(polinomio);
          int_mom = polyint([polinomio 0]);
          res_forca = polyval(int_poli, x) - polyval(int_poli, xi);
@@ -96,13 +96,13 @@ function retval = esforcosMomentos (vetorMomentos, momentos, apoios, carregament
 			end
    		else
 			break;
-		end 
+		end
 	 end
     end
     x_hist = [x_hist x];
-    Fv_hist = [Fv_hist res];	
+    Fv_hist = [Fv_hist res];
   end
- 
+
   [xs, ys] = stairs(x_hist, Fv_hist);
   figure(4);
   plot(xs, ys, "linewidth", 2, "color", [0.682, 0.918, 0]);

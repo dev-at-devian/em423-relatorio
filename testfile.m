@@ -18,4 +18,4 @@ global viga = struct();
 
 
 # Obtemos as informações do problema contidas no arquivo dados.txt
-file_parse("testdata.txt"); 
+file_parse("testdata.txt");

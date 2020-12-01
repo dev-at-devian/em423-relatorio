@@ -1,5 +1,5 @@
-function out = fix_loads() 
-    
+function out = fix_loads()
+
     global carregamentos;
     global forcas_verticais;
     global apoios;

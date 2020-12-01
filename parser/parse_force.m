@@ -26,7 +26,7 @@ function out = parse_force(tokens, line)
         end
         i++;
     end
-    
+
     switch angle
         case 0
             forcas_horizontais{end+1} = struct("value", value, "position", position);
@@ -45,7 +45,7 @@ function out = parse_force(tokens, line)
             singfun_forcas_x{end+1} = singfun(-1,position,value*cosd(angle));
             forcas_verticais{end+1} = struct("value", value*sind(angle), "position", position);
             singfun_carregamentos{end+1} = singfun(-1,position,value*sind(angle));
-            
+
     end
 
 endfunction

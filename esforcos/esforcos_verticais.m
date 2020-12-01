@@ -1,11 +1,11 @@
 function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
-  
+
 
   # Junta os apoios com reacao vertical ao conjunto forcas
   n_apoios = length(apoios);
 
   for i = 1:n_apoios
-	apoio = apoios{i};	
+	apoio = apoios{i};
     	if !isnan(apoio.vertical)
        		vetorVerticais{end+1} = struct("value", apoio.vertical, "position",apoio.position);
     	end
@@ -29,14 +29,14 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
   end
 
   % Forcas verticais
-  
+
   nVerticais = length(vetorVerticais);
-  
+
   sumVertical = 0;
   x_hist = [];
   Fv_hist = [];
   n_carregamentos = length(carregamentos);
-  
+
   Fv_hist = [Fv_hist 0];
   x_hist = [x_hist 0];
 
@@ -52,12 +52,12 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
 		break;
 	end
     end
-    	
+
     # Se for carregamento, realiza tratamento especifico
-    if index_carregamento != 0	
+    if index_carregamento != 0
       x0 = carregamentos{index_carregamento}.start_position;
       x1 = carregamentos{index_carregamento}.end_position;
-      polinomio = cell2mat(carregamentos{index_carregamento}.coefficients); 
+      polinomio = cell2mat(carregamentos{index_carregamento}.coefficients);
       int_poli = polyint(polinomio);
       for j = x0:(x1 - x0)/100:x1
         x_hist = [x_hist j];
@@ -71,10 +71,10 @@ function retval = esforcosVerticais (vetorVerticais, apoios, carregamentos, L)
       x_hist = [x_hist xm];
     end
   end
-    
+
   Fv_hist = [Fv_hist sumVertical];
   x_hist = [x_hist L];
- 
+
   [xs, ys] = stairs(x_hist, Fv_hist);
   figure(3);
   plot(xs, ys, "linewidth", 2, "color", [1, 0.757, 0.027]);

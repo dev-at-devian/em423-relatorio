@@ -1,4 +1,4 @@
-function out = parse_torque(tokens, line) 
+function out = parse_torque(tokens, line)
     global torques;
     global singfun_torques;
     position = 0;
@@ -10,7 +10,7 @@ function out = parse_torque(tokens, line)
                 i = length(tokens);
             case "valor"
                 value = str2num(tokens{++i});
-            case "posicao" 
+            case "posicao"
                 position = str2num(tokens{++i});
             otherwise
                 error("Erro (linha %d, coluna %d): Comando '%s' inválido", line, i, tokens{i});
