@@ -219,7 +219,7 @@ classdef singfun < handle
         endfunction
 
         function h = plot (s, rng, varargin)
-            x = [rng(1) : ((rng(2)-rng(1))/100) : rng(2)];
+            x = [rng(1) : ((rng(2)-rng(1))/500) : rng(2)];
             y = [];
             for i = 1:length(x)
                 y(end+1) = subsref(s, struct("type", "()", "subs", {{x(i)}}));
