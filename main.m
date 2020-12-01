@@ -149,5 +149,4 @@ for i = 1:length(apoios)
     disp(apoios{i});
 end
 print_support_reactions();
-graficos_reacoes(viga, singfun_carregamentos, singfun_forcas_x, singfun_torques);
-
+graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x, singfun_torques);
