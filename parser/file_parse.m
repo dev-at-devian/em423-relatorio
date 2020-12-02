@@ -29,7 +29,6 @@ function out = file_parse(file_path)
         end
 
     end
-    fix_loads();
 
 endfunction
 

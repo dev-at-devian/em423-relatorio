@@ -1,31 +1,49 @@
 function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x, singfun_torques)
-    aux_fy = singfunsum();
-    force_y = singfunsum();
+    forcas_y = singfunsum();
+    forca_cortante = singfunsum();
     momentum = singfunsum();
+    inclinacao = singfunsum();
+    deflexao = singfunsum();
 
     forcas_x = singfunsum();
     normal = singfunsum();
     alongamento = singfunsum();
 
-    aux_t = singfunsum();
-    torque = singfunsum();
+    torques = singfunsum();
+    torque_interno = singfunsum();
     torcao = singfunsum();
 
     for i = 1:length(singfun_carregamentos)
-        aux_fy = aux_fy + singfun_carregamentos{i};
+        forcas_y = forcas_y + singfun_carregamentos{i};
     endfor
+
     for i = 1:length(singfun_forcas_x)
         forcas_x = forcas_x + singfun_forcas_x{i};
     endfor
+
     for i = 1:length(singfun_torques)
-        aux_t = aux_t + singfun_torques{i};
+        torques = torques + singfun_torques{i};
     endfor
 
-    force_y = integrate_noconst(aux_fy);
-    momentum = integrate_noconst(force_y);
-    normal = integrate_noconst(forcas_x);
-    torque = integrate_noconst(aux_t);
+    forca_cortante = integrate_noconst(forcas_y)
+    momentum = integrate_noconst(forca_cortante)
 
+    inclinacao = (1 / (viga.Ip * viga.elasticity)) * integrate(momentum);
+    # A constante será dada pelo apoio fixo, onde a inclinacão é nula
+    for i = 1:length(apoios)
+        if !isnan(apoios{i}.momentum)
+            defineconst(inclinacao, apoios{i}.position, 0);
+        endif
+    endfor
+    inclinacao
+
+    deflexao = integrate(inclinacao);
+    # A constante será dada por qualquer apoio fixo, rolete ou pino, onde a deflexão é nula
+    defineconst(deflexao, apoios{1}.position, 0);
+    deflexao
+
+
+    normal = integrate_noconst(forcas_x);
     alongamento = (1 / (viga.area * viga.elasticity)) * integrate(normal);
     # A constante será dada pelo apoio (o apoio fixo ou pino), onde o alongamento é nulo
     for i = 1:length(apoios)
@@ -34,7 +52,8 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         endif
     endfor
 
-    torcao = (1 / (viga.shear * viga.Ip)) * integrate(torque);
+    torque_interno = integrate_noconst(torques);
+    torcao = (1 / (viga.shear * viga.Ip)) * integrate(torque_interno);
     # A constante será dada pelo apoio (o apoio fixo ou pino), onde o ângulo de torção é nulo
     for i = 1:length(apoios)
         if !isnan(apoios{i}.horizontal)
@@ -51,7 +70,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     ylabel("N(x) [N]");
 
     figure(2);
-    plot(force_y, [0, viga.width], "linewidth", 2, "color", [1, 0.757, 0.027]);
+    plot(forca_cortante, [0, viga.width], "linewidth", 2, "color", [1, 0.757, 0.027]);
     grid on;
     set(gca, "fontsize", 12);
     title("Esforços Internos - Força Cortante");
@@ -64,15 +83,15 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     set(gca, "fontsize", 12);
     title("Esforços Internos - Momento");
     xlabel("x [m]");
-    ylabel("M [Nm]");
+    ylabel("M(x) [Nm]");
 
     figure(4);
-    plot(torque, [0, viga.width], "linewidth", 2, "color", [1, 0.09, 0.016]);
+    plot(torque_interno, [0, viga.width], "linewidth", 2, "color", [1, 0.09, 0.016]);
     grid on;
     set(gca, "fontsize", 12);
     title("Esforços Internos - Torque");
     xlabel("x [m]");
-    ylabel("T [Nm]");
+    ylabel("T(x) [Nm]");
 
     figure(5);
     plot(alongamento, [0, viga.width], "linewidth", 2, "color", [0.03, 0.5, 1]);
@@ -80,7 +99,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     set(gca, "fontsize", 12);
     title("Alongamento da viga");
     xlabel("x [m]");
-    ylabel("delta L [m]");
+    ylabel("delta L(x) [m]");
 
     figure(6);
     plot(torcao, [0, viga.width], "linewidth", 2, "color", [0.03, 0.5, 1]);
@@ -88,6 +107,23 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     set(gca, "fontsize", 12);
     title("Ângulo de torção da viga");
     xlabel("x [m]");
-    ylabel("phi [rad]");
+    ylabel("phi(x) [rad]");
+
+    figure(7);
+    plot(inclinacao, [0, viga.width], "linewidth", 2, "color", [0.03, 0.5, 1]);
+    grid on;
+    set(gca, "fontsize", 12);
+    title("Inclinação da viga");
+    xlabel("x [m]");
+    ylabel("theta(x) [rad]");
+
+    figure(8);
+    plot(deflexao, [0, viga.width], "linewidth", 2, "color", [0.03, 0.5, 1]);
+    grid on;
+    set(gca, "fontsize", 12);
+    title("Deflexão da viga");
+    xlabel("x [m]");
+    ylabel("v(x) [m]");
+
 endfunction
 
