@@ -28,7 +28,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     forca_cortante = integrate_noconst(forcas_y)
     momentum = integrate_noconst(forca_cortante)
 
-    inclinacao = (1 / (viga.Ip * viga.elasticity)) * integrate(momentum);
+    inclinacao = (1 / (viga.Iz * viga.elasticity)) * integrate(momentum);
     # A constante será dada pelo apoio fixo, onde a inclinacão é nula
     for i = 1:length(apoios)
         if !isnan(apoios{i}.momentum)
@@ -102,7 +102,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     ylabel("delta L(x) [m]");
 
     figure(6);
-    plot(torcao, [0, viga.width], "linewidth", 2, "color", [0.03, 0.5, 1]);
+    plot(torcao, [0, viga.width], "linewidth", 2, "color", [0.961, 0, 0.341]);
     grid on;
     set(gca, "fontsize", 12);
     title("Ângulo de torção da viga");
@@ -110,7 +110,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     ylabel("phi(x) [rad]");
 
     figure(7);
-    plot(inclinacao, [0, viga.width], "linewidth", 2, "color", [0.03, 0.5, 1]);
+    plot(inclinacao, [0, viga.width], "linewidth", 2, "color", [0.835, 0, 0.976]);
     grid on;
     set(gca, "fontsize", 12);
     title("Inclinação da viga");
@@ -118,7 +118,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     ylabel("theta(x) [rad]");
 
     figure(8);
-    plot(deflexao, [0, viga.width], "linewidth", 2, "color", [0.03, 0.5, 1]);
+    plot(deflexao, [0, viga.width], "linewidth", 2, "color", [0.192, 0.106, 0.573]);
     grid on;
     set(gca, "fontsize", 12);
     title("Deflexão da viga");

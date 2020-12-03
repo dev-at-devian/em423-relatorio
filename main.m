@@ -114,39 +114,12 @@ global viga = struct();
 
 # Obtemos as informações do problema contidas no arquivo dados.txt
 file_parse("dados.txt");
-printf("Carregamentos:\n");
-for i = 1:length(singfun_carregamentos)
-    disp(singfun_carregamentos{i});
-end
-printf("Forças em x:\n");
-for i = 1:length(singfun_forcas_x)
-    disp(singfun_forcas_x{i});
-end
-printf("Torques:\n");
-for i = 1:length(singfun_torques)
-    disp(singfun_torques{i});
-end
-printf("Torques:\n");
-for i = 1:length(apoios)
-    disp(apoios{i});
-end
 
+# Calculamos as reações
 calcular_reacoes();
-printf("Carregamentos:\n");
-for i = 1:length(singfun_carregamentos)
-    disp(singfun_carregamentos{i});
-end
-printf("Forças em x:\n");
-for i = 1:length(singfun_forcas_x)
-    disp(singfun_forcas_x{i});
-end
-printf("Torques:\n");
-for i = 1:length(singfun_torques)
-    disp(singfun_torques{i});
-end
-printf("Apoios:\n");
-for i = 1:length(apoios)
-    disp(apoios{i});
-end
+
+# Imprimimos as reações
 print_support_reactions();
+
+# Apresentamos os gráficos de esforcos internos, inclinacao, deflexao, alongamento e torcao
 graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x, singfun_torques);
