@@ -1,78 +1,57 @@
+#
 # Arquivo de descrição do problema
 #
+#
 # Sintaxe:
+# [elemento] [opção #1] [valor #1] [opção #2] [valor #2] ... [opção #n] [valor #n]
 #
-# [elemento] [opcao1] [valor1] [opcao2] [valor2] ... [opcaon] [valorn]
+# Comentários devem iniciar com "#" e possuir espaço após o caractere.
 #
-# Elementos:
+# Para elementos com direção e sentido, são considerados positivos os sentidos para cima ou
+# anti-horários e para a direita, e negativos os sentidos para baixo e para a esquerda. A regra da
+# mão direita dará a direção do vetor torque.
 #
-#  - viga: Características da viga
 #
-#          Opções: tipo [barra/cilindro/oco]               -> Tipo de viga
-#                  modulo [elastico/cisalhamento] [numero] -> E/G (Pa)
+# Elementos possíveis:
 #
-#          - Para tipo barra:
-#                  altura [numero]      -> Altura da viga (eixo y) (m)
-#                  comprimento [numero] -> Comprimento da viga (eixo x) (m)
-#                  largura [numero]     -> Largura da viga (eixo z) (m)
+# "viga": características da viga
+#   'comprimento [valor]'           comprimento da viga
+#   'altura [valor]'                altura da viga (caso barra)
+#   'largura [valor]'               largura da viga (caso barra)
+#   'modulo elastico [valor]'       mod. elástico da viga
+#   'modulo cisalhamento [valor]'   mod. cisalhamento da viga
+#   'raio [valor]'                  raio da viga (caso cilindrico ou oco)
+#   'tipo barra/cilindro/oco'       tipo da barra
 #
-#          - Para tipo cilindro:
-#                  raio [numero] -> Raio da viga (m)
+# "forca": características de uma força pontual
+#   'valor [valor]'     valor da força pontual
+#   'posicao [valor]'   posição de aplicação da força em relação à origem (inicio da barra)
+#   'angulo [valor]'    ângulo de aplicação da força em relação a horizontal
+#   'vertical'          implica que ângulo é 90 graus
+#   'horizontal'        implica que o ângulo é zero graus
 #
-#          - Para tipo oco:
-#                  raio externo [numero] -> Raio externo da viga (m)
-#                  raio interno [numero] -> Raio interno da viga (m)
+# "carregamento": características de um carregamento (força vertical)
+#   'de [valor] ate [valor]'    posição de início e final do carregamento
+#   'coeficientes [polinomio]'  coeficientes do polinômio que representa a força do
+#                               carregamento
+# onde
+#   '[polinomio]' pode ser uma sequência de valores, começando do maior termo
+#   Por exemplo: 7 5 0 1 é o polinômio 7*x^3 + 5*x^2 + 0*x^1 + 1
 #
-#          Exemplos: viga tipo cilindro raio 3 modulo elastico 60000000000
-#                    viga tipo barra altura 0.41 largura 1 comprimento 5
+# "momento": características de um momento na viga
+#   'valor [valor]'     valor do momento
+#   'posicao [valor]'   posição do momento na viga
 #
-#  - forca: Força aplicada na viga
+# "apoio": características do apoio na viga
+#   'tipo fixo/pino/rolete'     tipo do apoio na viga
+#   'posicao [valor]'           posição do apoio
 #
-#          Opções: valor [numero]   -> Módulo da força, com sinal indicando o sentido* (N)
-#                  vertical         -> Indica que a força é aplicada na direção vertical
-#                  horizontal       -> Indica que a força é aplicada na direção horizontal
-#                  posicao [numero] -> Posição da força no eixo x da viga (m)
-#                  angulo [numero]  -> Ângulo com o vetor apontando no sentido horizontal positivo* (graus)
+# "torque": características de um torque na viga
+#   'valor [valor]'     valor do torque aplicado na viga
+#   'posicao [valor]'   posição de aplicação do torque na viga
 #
-#          Exemplos: forca valor 10 horizontal posicao 2
-#                    forca angulo 45 posicao 15 valor 12.1346
-#
-#  - apoio: Apoio colocado na viga
-#
-#          Opções: tipo [fixo/pino/rolete]   -> Tipo de apoio
-#                  posicao [numero]          -> Posição do apoio no eixo x da viga (m)
-#
-#          Exemplos: apoio posicao 2 tipo rolete
-#                    apoio tipo fixo
-#
-#  - momento: Momento aplicado no eixo z da viga
-#
-#          Opções: valor [numero]   -> Valor do momento (Nm)
-#                  posicao [numero] -> Posição do momento no eixo x da viga (m)
-#
-#          Exemplos: momento valor 9.31
-#                    momento posicao 61.413 valor 314
-#
-#  - torque: Torque aplicado na viga
-#
-#          Opções: valor [numero]   -> Valor do torque (Nm)
-#                  posicao [numero] -> Posição do torque no eixo x da viga (m)
-#
-#          Exemplos: torque posicao 0 valor 763.12
-#                    torque valor 1
-#
-#  - carregamento: Carregamento distribuido aplicado entre dois pontos da viga
-#
-#          Opções: coeficientes [numero] ... [numero]   -> Coeficientes do polinômio que descreve o carregamento, em ordem decrescente de grau (N/m)
-#                  de [numero] ate [numero]             -> Posições inicial e final do carregamento no eixo x da viga (m)
-#
-#          Exemplos: carregamento de 0 ate 2 coeficientes 1 6 4 12 6 75 123
-#                    carregamento coeficientes 9 9 3 12 87 24 8 1 8 0 2 de 1 ate 5
-#
-# * Para elementos com direção e sentido, são considerados positivos os sentidos para cima e para a direita, e negativos os sentidos para baixo e para a esquerda
 
-
-viga tipo barra altura 0.4 largura 0.2 modulo elastico 12000000000 modulo cisalhamento 1 comprimento 6
+viga tipo barra altura 0.4 largura 0.2 modulo elastico 12000000000 modulo cisalhamento 63400000000 comprimento 6
 apoio tipo fixo posicao 6
 forca vertical valor -6000 posicao 0
 forca vertical valor -4000 posicao 1.5
