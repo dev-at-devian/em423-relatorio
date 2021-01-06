@@ -123,4 +123,4 @@ calcular_reacoes();
 print_support_reactions();
 
 # Apresentamos os gráficos de esforcos internos, inclinacao, deflexao, alongamento e torcao
-% graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x, singfun_torques);
+graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x, singfun_torques);
