@@ -9,7 +9,7 @@ function out = file_parse(file_path)
     end
 
     for i = 1:length(tokens)
-        switch tokens{i}{1}
+        switch char(tokens{i}{1})
             case "#"
                 continue
             case "viga"
@@ -25,7 +25,13 @@ function out = file_parse(file_path)
             case "carregamento"
                 parse_load(tokens{i}, i);
             otherwise
-                error("Erro (linha %d, coluna %d): Comando '%s' inválido", i, 1, tokens{i}{1});
+                error(
+                    "Erro (linha %d, coluna %d): Comando inválido: \"%s\" na linha \"%s\"",
+                    i,
+                    1,
+                    do_string_escapes(char(tokens{i}{1})),
+                    do_string_escapes(char(tokens{i}))
+                );
         end
 
     end

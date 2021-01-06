@@ -93,6 +93,7 @@ global singfun_torques = {};
 # - volume: volume
 # - elasticity: módulo de elasticidade
 # - shear: módulo de cisalhamento
+# - yield_strength: limite de escoamento
 # - Iz: momento de inércia (eixo z)
 # - Iy: momento de inércia (eixo y)
 # - Ip: momento de inércia (polar)
@@ -122,4 +123,4 @@ calcular_reacoes();
 print_support_reactions();
 
 # Apresentamos os gráficos de esforcos internos, inclinacao, deflexao, alongamento e torcao
-graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x, singfun_torques);
+% graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x, singfun_torques);

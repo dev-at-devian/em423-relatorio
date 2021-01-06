@@ -1,6 +1,12 @@
 #
 # Arquivo de descrição do problema
 #
+# Se houverem erros de comando inválido em linhas vazias ou de comentários,
+# remova os comentários e linhas vazias deste arquivo e teste novamente.
+# (Problemas de compatibilidade do Octave com o Windows em alguns computadores,
+# pois o nosso projeto possui arquivos tanto com linhas no formato de
+# Linux -- LF -- quanto no de Windows -- CRLF)
+#
 #
 # Sintaxe:
 # [elemento] [opção #1] [valor #1] [opção #2] [valor #2] ... [opção #n] [valor #n]
@@ -20,7 +26,10 @@
 #   'largura [valor]'               largura da viga (caso barra)
 #   'modulo elastico [valor]'       mod. elástico da viga
 #   'modulo cisalhamento [valor]'   mod. cisalhamento da viga
-#   'raio [valor]'                  raio da viga (caso cilindrico ou oco)
+#   'limite escoamento [valor]'     limite de escoamento do material da viga
+#   'raio [valor]'                  raio da viga (caso cilindro maciço)
+#   'raio interno [valor]'          raio interno da viga (caso cilindro oco)
+#   'raio externo [valor]'          raio externo da viga (caso cilindro oco)
 #   'tipo barra/cilindro/oco'       tipo da barra
 #
 # "forca": características de uma força pontual
@@ -51,7 +60,7 @@
 #   'posicao [valor]'   posição de aplicação do torque na viga
 #
 
-viga tipo barra altura 0.4 largura 0.2 modulo elastico 12000000000 modulo cisalhamento 63400000000 comprimento 6
+viga tipo barra altura 0.4 largura 0.2 modulo elastico 12000000000 modulo cisalhamento 63400000000 comprimento 6 limite escoamento 220000000
 apoio tipo fixo posicao 6
 forca vertical valor -6000 posicao 0
 forca vertical valor -4000 posicao 1.5

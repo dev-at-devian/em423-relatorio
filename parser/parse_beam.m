@@ -9,6 +9,7 @@ function out = parse_beam(tokens, line)
     inner_radius = 0;
     elasticity = 0;
     shear = 0;
+    yield_strength = 0;
     area = 0;
     volume = 0;
     Iz = 0;
@@ -32,6 +33,13 @@ function out = parse_beam(tokens, line)
                 elseif strcmp(tokens{i+1}, "cisalhamento")
                     i++;
                     shear = str2num(tokens{++i});
+                else
+                    error("Erro (linha %d, coluna %d): Comando '%s' inválido", line, i, tokens{i});
+                endif
+            case "limite"
+                if strcmp(tokens{i+1}, "escoamento")
+                    i++;
+                    yield_strength = str2num(tokens{++i});
                 else
                     error("Erro (linha %d, coluna %d): Comando '%s' inválido", line, i, tokens{i});
                 endif
@@ -96,6 +104,7 @@ function out = parse_beam(tokens, line)
     viga.inner_radius = inner_radius;
     viga.elasticity = elasticity;
     viga.shear = shear;
+    viga.yield_strength = yield_strength;
     viga.area = area;
     viga.volume = volume;
     viga.Iz = Iz;
