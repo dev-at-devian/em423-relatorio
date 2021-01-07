@@ -1,11 +1,15 @@
 #
 # Arquivo de descrição do problema
 #
-# Se houverem erros de comando inválido em linhas vazias ou de comentários,
-# remova os comentários e linhas vazias deste arquivo e teste novamente.
-# (Problemas de compatibilidade do Octave com o Windows em alguns computadores,
-# pois o nosso projeto possui arquivos tanto com linhas no formato de
-# Linux -- LF -- quanto no de Windows -- CRLF)
+#
+# Se houverem erros de comando inválido em linhas vazias ou de comentários, você pode tentar
+# arrumar de duas formas:
+# 1. removendo comentários e linhas vazias deste arquivo;
+# 2. abrindo o arquivo num editor capaz de converter a sequência de fim de linha (end of line
+#   sequence) para LF.
+# Esse erro acontece pois Octave possui alguns problemas de compatibilidade com o fim de linha
+# utilizado no Windows (CRLF) pois espera um arquivo com o fim de linha de sistemas Unix (LF),
+# o que atrapalha as comparações de texto que fazemos.
 #
 #
 # Sintaxe:
