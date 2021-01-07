@@ -77,6 +77,18 @@ function apoios = calcular_reacoes()
         # Adicionamos no sistema linear na eq. de momento depois da viga (quarta linha de A)
         A(4, coluna_atual) = coeficiente_momento_int;
 
+        # Integramos uma vez pra participar corretamente da eq. de forças cortantes
+        incogn_integrada = integrate_noconst(incognitas_momentos{i});
+        # Calculamos sua participação na eq. de forças cortantes antes da viga
+        coeficiente_cortantes = incogn_integrada(0, -1);
+        # Adicionamos no sistema linear na eq. de forças cortantes antes da viga (primeira linha de A)
+        A(1, coluna_atual) = coeficiente_cortantes;
+
+        # Calculamos sua participação na eq. de forças cortantes depois da viga
+        coeficiente_cortantes = incogn_integrada(viga.width, -1);
+        # Adicionamos no sistema linear na eq. de forças cortantes depois da viga (terceira linha de A)
+        A(3, coluna_atual) = coeficiente_cortantes;
+
         # Quando acabarmos de adicionar, passamos para a próxima incógnita
         coluna_atual += 1;
     endfor
@@ -86,13 +98,25 @@ function apoios = calcular_reacoes()
         incogn_integrada = integrate_noconst(incognitas_forcas_y{i});
         # Calculamos a sua participação na eq. de forças cortantes antes da viga
         coeficiente_cortantes = incogn_integrada(0, -1);
-        # Adicionamos no sistema linear na eq. de momento antes da viga (primeira linha de A)
+        # Adicionamos no sistema linear na eq. de forças cortantes antes da viga (primeira linha de A)
         A(1, coluna_atual) = coeficiente_cortantes;
 
         # Calculamos a sua participação na eq. de forças cortantes depois da viga
         coeficiente_cortantes = incogn_integrada(viga.width, +1);
-        # Adicionamos no sistema linear na eq. de momento depois da viga (terceira linha de A)
+        # Adicionamos no sistema linear na eq. de forças cortantes depois da viga (terceira linha de A)
         A(3, coluna_atual) = coeficiente_cortantes;
+
+        # Integramos duas vezes para participar corretamente da eq. de momento interno
+        incogn_integrada = integrate_noconst(integrate_noconst(incognitas_forcas_y{i}));
+        # Calculamos a sua participação na eq. de momento interno antes da viga
+        coeficiente_momento_int = incogn_integrada(0, -1);
+        # Adicionamos no sistema linear na eq. de momento antes da viga (segunda linha de A)
+        A(2, coluna_atual) = coeficiente_momento_int;
+
+        # Calculamos a sua participação na eq. de momento interno depois da viga
+        coeficiente_momento_int = incogn_integrada(viga.width, +1);
+        # Adicionamos no sistema linear na eq. de momento depois da viga (quarta linha de A)
+        A(4, coluna_atual) = coeficiente_momento_int;
 
         # Quando acabarmos de adicionar, passamos para a próxima incógnita
         coluna_atual += 1;
