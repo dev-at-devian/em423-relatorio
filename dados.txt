@@ -60,7 +60,7 @@
 #   'posicao [valor]'   posição de aplicação do torque na viga
 #
 
-viga tipo barra altura 0.4 largura 0.2 modulo elastico 12000000000 modulo cisalhamento 63400000000 comprimento 6 limite escoamento 220000000
+viga tipo cilindro raio 2 modulo elastico 12000000000 modulo cisalhamento 63400000000 comprimento 6 limite escoamento 220000000
 apoio tipo fixo posicao 6
 forca vertical valor -6000 posicao 0
 forca vertical valor -4000 posicao 1.5

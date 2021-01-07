@@ -60,6 +60,14 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             defineconst(torcao, apoios{i}.position, 0);
         endif
     endfor
+    
+    # Ponto A (mais alto no y e no meio do z)
+    tensao_normal_A = integrate_noconst(forcas_x) * (1 / viga.area) - integrate_noconst(momentum) * viga.radius * (1 / viga.I);
+    tensao_cisalhamento_A = integrate_noconst(torques) * viga.radius * (1 / viga.Ip)
+    
+    # Ponto B (no meio em y e mais a direita em z)
+    tensao_normal_B = integrate_noconst(forcas_x) * (1 / viga.area);
+    tensao_cisalhamento_B = integrate_noconst(torques) * viga.radius * (1 / viga.Ip) + (4/3) * integrate_noconst(forcas_y) * (1/viga.area) * correction_factor;
 
     figure(1);
     plot(normal, [0, viga.width], "linewidth", 2, "color", [1, 0.435, 0]);
@@ -124,6 +132,14 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     title("Deflexão da viga");
     xlabel("x [m]");
     ylabel("v(x) [m]");
+    
+    figure(9);
+    plot(tensao_normal_A, [0, viga.width], "linewidth", 2, "color", [0.192, 0.106, 0.573]);
+    grid on;
+    set(gca, "fontsize", 12);
+    title("Tensao normal no ponto  A");
+    xlabel("x [m]");
+    ylabel("T(x) [Nm]");
 
 endfunction
 
