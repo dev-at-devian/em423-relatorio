@@ -61,6 +61,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             defineconst(torcao, apoios{i}.position, 0);
         endif
     endfor
+    torque_interno
     torcao
 
 
