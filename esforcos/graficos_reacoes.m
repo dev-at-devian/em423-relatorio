@@ -64,65 +64,74 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     torque_interno
     torcao
 
+    figura_atual = 1;
 
-    figure(1);
-    plot(normal, [0, viga.width], "linewidth", 2, "color", [1, 0.435, 0]);
+    figure(figura_atual);
+    figura_atual = figura_atual + 1;
+    plot(normal, [0, viga.width], "color", [1, 0.435, 0]);
     grid on;
     set(gca, "fontsize", 12);
     title("Esforços Internos - Força Normal");
     xlabel("x [m]");
     ylabel("N(x) [N]");
 
-    figure(2);
-    plot(forca_cortante, [0, viga.width], "linewidth", 2, "color", [1, 0.757, 0.027]);
+    figure(figura_atual);
+    figura_atual = figura_atual + 1;
+    plot(forca_cortante, [0, viga.width], "color", [1, 0.757, 0.027]);
     grid on;
     set(gca, "fontsize", 12);
     title("Esforços Internos - Força Cortante");
     xlabel("x [m]");
     ylabel("V(x) [N]");
 
-    figure(3);
-    plot(momentum, [0, viga.width], "linewidth", 2, "color", [0.682, 0.918, 0]);
+    figure(figura_atual);
+    figura_atual = figura_atual + 1;
+    plot(momentum, [0, viga.width], "color", [0.682, 0.918, 0]);
     grid on;
     set(gca, "fontsize", 12);
     title("Esforços Internos - Momento");
     xlabel("x [m]");
     ylabel("M(x) [Nm]");
 
-    figure(4);
-    plot(torque_interno, [0, viga.width], "linewidth", 2, "color", [1, 0.09, 0.016]);
+    figure(figura_atual);
+    figura_atual = figura_atual + 1;
+    plot(torque_interno, [0, viga.width], "color", [1, 0.09, 0.016]);
     grid on;
     set(gca, "fontsize", 12);
     title("Esforços Internos - Torque");
     xlabel("x [m]");
     ylabel("T(x) [Nm]");
 
-    figure(5);
-    plot(alongamento, [0, viga.width], "linewidth", 2, "color", [0.03, 0.5, 1]);
+    figure(figura_atual);
+    figura_atual = figura_atual + 1;
+    plot(alongamento, [0, viga.width], "color", [0.03, 0.5, 1]);
     grid on;
     set(gca, "fontsize", 12);
     title("Alongamento da viga");
     xlabel("x [m]");
     ylabel("delta L(x) [m]");
 
-    figure(6);
-    plot(torcao, [0, viga.width], "linewidth", 2, "color", [0.961, 0, 0.341]);
+    figure(figura_atual);
+    figura_atual = figura_atual + 1;
+    plot(torcao, [0, viga.width], "color", [0.961, 0, 0.341]);
     grid on;
     set(gca, "fontsize", 12);
     title("Ângulo de torção da viga");
     xlabel("x [m]");
     ylabel("phi(x) [rad]");
 
-    figure(7);
-    plot(inclinacao, [0, viga.width], "linewidth", 2, "color", [0.835, 0, 0.976]);
+    figure(figura_atual);
+    figura_atual = figura_atual + 1;
+    plot(inclinacao, [0, viga.width], "color", [0.835, 0, 0.976]);
     grid on;
     set(gca, "fontsize", 12);
     title("Inclinação da viga");
     xlabel("x [m]");
     ylabel("theta(x) [rad]");
 
-    figure(8);
-    plot(deflexao, [0, viga.width], "linewidth", 2, "color", [0.192, 0.106, 0.573]);
+    figure(figura_atual);
+    figura_atual = figura_atual + 1;
+    plot(deflexao, [0, viga.width], "color", [0.192, 0.106, 0.573]);
     grid on;
     set(gca, "fontsize", 12);
     title("Deflexão da viga");
@@ -196,8 +205,12 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             fator_correcao = (viga.outer_radius^2 + viga.outer_radius * viga.inner_radius + viga.inner_radius^2) / (viga.outer_radius^2 + viga.inner_radius^2);
         endif
 
+        G = viga.shear;
+        E = viga.elasticity;
+        v = E / (2 * G) - 1;
+
         # Para os gráficos feitos manualmente
-        intervalo_grafico = 0:(viga.width / 8):viga.width;
+        intervalo_grafico = 0:(viga.width / 500):viga.width;
 
 
         # Ponto A
@@ -228,6 +241,12 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         tensao_principal_1_A = [];
         tensao_principal_2_A = [];
         tensao_cisalhamento_max_abs_A = [];
+        deformacao_normal_A_x = [];
+        deformacao_normal_A_y = [];
+        deformacao_normal_A_z = [];
+        deformacao_cisalhamento_A_xy = [];
+        deformacao_cisalhamento_A_yz = [];
+        deformacao_cisalhamento_A_zx = [];
         # Laço para fazer o gráfico, vários pontos em toda a viga
         for posicao_x = intervalo_grafico
             # Pegamos os valores na posição atual
@@ -243,6 +262,15 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             # Tensao de cisalhamento máxima absoluta
             tensao_cisalhamento_max_abs_A_ = (max([tensao_principal_1_A_, tensao_principal_2_A_, 0]) - min([tensao_principal_1_A_, tensao_principal_2_A_, 0])) / 2;
             tensao_cisalhamento_max_abs_A(end+1) = tensao_cisalhamento_max_abs_A_;
+
+            # Deformação normal
+            deformacao_normal_A_x(end+1) = tensao_normal_A_ / E;
+            deformacao_normal_A_y(end+1) = -v * tensao_normal_A_ / E;
+            deformacao_normal_A_z(end+1) = -v * tensao_normal_A_ / E;
+            # Deformação de cisalhamento
+            deformacao_cisalhamento_A_xy(end+1) = 0; # é zerada
+            deformacao_cisalhamento_A_yz(end+1) = 0; # não possuímos tau_yz
+            deformacao_cisalhamento_A_zx(end+1) = tensao_cisalhamento_A_xz_ / G;
         endfor
 
         # Ponto B
@@ -273,6 +301,12 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         tensao_principal_1_B = [];
         tensao_principal_2_B = [];
         tensao_cisalhamento_max_abs_B = [];
+        deformacao_normal_B_x = [];
+        deformacao_normal_B_y = [];
+        deformacao_normal_B_z = [];
+        deformacao_cisalhamento_B_xy = [];
+        deformacao_cisalhamento_B_yz = [];
+        deformacao_cisalhamento_B_zx = [];
         # Laço para fazer o gráfico, vários pontos em toda a viga
         for posicao_x = intervalo_grafico
             # Pegamos os valores na posição atual
@@ -288,6 +322,15 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             # Tensao de cisalhamento máxima absoluta
             tensao_cisalhamento_max_abs_B_ = (max([tensao_principal_1_B_, tensao_principal_2_B_, 0]) - min([tensao_principal_1_B_, tensao_principal_2_B_, 0])) / 2;
             tensao_cisalhamento_max_abs_B(end+1) = tensao_cisalhamento_max_abs_B_;
+
+            # Deformação normal
+            deformacao_normal_B_x(end+1) = tensao_normal_B_ / E;
+            deformacao_normal_B_y(end+1) = -v * tensao_normal_B_ / E;
+            deformacao_normal_B_z(end+1) = -v * tensao_normal_B_ / E;
+            # Deformação de cisalhamento
+            deformacao_cisalhamento_B_xy(end+1) = tensao_cisalhamento_B_xy_ / G;
+            deformacao_cisalhamento_B_yz(end+1) = 0; # não possuímos tau_yz
+            deformacao_cisalhamento_B_zx(end+1) = 0; # é zerada
         endfor
 
         # Ponto C
@@ -318,6 +361,12 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         tensao_principal_1_C = [];
         tensao_principal_2_C = [];
         tensao_cisalhamento_max_abs_C = [];
+        deformacao_normal_C_x = [];
+        deformacao_normal_C_y = [];
+        deformacao_normal_C_z = [];
+        deformacao_cisalhamento_C_xy = [];
+        deformacao_cisalhamento_C_yz = [];
+        deformacao_cisalhamento_C_zx = [];
         # Laço para fazer o gráfico, vários pontos em toda a viga
         for posicao_x = intervalo_grafico
             # Pegamos os valores na posição atual
@@ -333,6 +382,15 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             # Tensao de cisalhamento máxima absoluta
             tensao_cisalhamento_max_abs_C_ = (max([tensao_principal_1_C_, tensao_principal_2_C_, 0]) - min([tensao_principal_1_C_, tensao_principal_2_C_, 0])) / 2;
             tensao_cisalhamento_max_abs_C(end+1) = tensao_cisalhamento_max_abs_C_;
+
+            # Deformação normal
+            deformacao_normal_C_x(end+1) = tensao_normal_C_ / E;
+            deformacao_normal_C_y(end+1) = -v * tensao_normal_C_ / E;
+            deformacao_normal_C_z(end+1) = -v * tensao_normal_C_ / E;
+            # Deformação de cisalhamento
+            deformacao_cisalhamento_C_xy(end+1) = 0; # é zerada
+            deformacao_cisalhamento_C_yz(end+1) = 0; # não possuímos tau_yz
+            deformacao_cisalhamento_C_zx(end+1) = tensao_cisalhamento_C_xz_ / G;
         endfor
 
         # Ponto D
@@ -363,6 +421,12 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         tensao_principal_1_D = [];
         tensao_principal_2_D = [];
         tensao_cisalhamento_max_abs_D = [];
+        deformacao_normal_D_x = [];
+        deformacao_normal_D_y = [];
+        deformacao_normal_D_z = [];
+        deformacao_cisalhamento_D_xy = [];
+        deformacao_cisalhamento_D_yz = [];
+        deformacao_cisalhamento_D_zx = [];
         # Laço para fazer o gráfico, vários pontos em toda a viga
         for posicao_x = intervalo_grafico
             # Pegamos os valores na posição atual
@@ -378,207 +442,350 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             # Tensao de cisalhamento máxima absoluta
             tensao_cisalhamento_max_abs_D_ = (max([tensao_principal_1_D_, tensao_principal_2_D_, 0]) - min([tensao_principal_1_D_, tensao_principal_2_D_, 0])) / 2;
             tensao_cisalhamento_max_abs_D(end+1) = tensao_cisalhamento_max_abs_D_;
+
+            # Deformação normal
+            deformacao_normal_D_x(end+1) = tensao_normal_D_ / E;
+            deformacao_normal_D_y(end+1) = -v * tensao_normal_D_ / E;
+            deformacao_normal_D_z(end+1) = -v * tensao_normal_D_ / E;
+            # Deformação de cisalhamento
+            deformacao_cisalhamento_D_xy(end+1) = tensao_cisalhamento_D_xy_ / G;
+            deformacao_cisalhamento_D_yz(end+1) = 0; # não possuímos tau_yz
+            deformacao_cisalhamento_D_zx(end+1) = 0; # é zerada
         endfor
 
         # Graficamos nossos resultados anteriores
         #
         # Ponto A
 
-        figure(9);
-        plot(tensao_normal_A, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_normal_A, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao normal no ponto A");
         xlabel("x [m]");
         ylabel("sigma(x) [Pa]");
 
-        figure(10);
-        plot(tensao_cisalhamento_A_xy, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_cisalhamento_A_xy, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento vertical no ponto A");
         xlabel("x [m]");
         ylabel("tau_xy(x) [Pa]");
 
-        figure(11);
-        plot(tensao_cisalhamento_A_xz, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_cisalhamento_A_xz, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento horizontal no ponto A");
         xlabel("x [m]");
         ylabel("tau_xz(x) [Pa]");
 
-        figure(12);
-        plot(intervalo_grafico, tensao_principal_1_A, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_principal_1_A, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao principal 1 no ponto A");
         xlabel("x [m]");
         ylabel("sigma_1(x) [Pa]");
 
-        figure(13);
-        plot(intervalo_grafico, tensao_principal_2_A, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_principal_2_A, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao principal 2 no ponto A");
         xlabel("x [m]");
         ylabel("sigma_2(x) [Pa]");
 
-        figure(14);
-        plot(intervalo_grafico, tensao_cisalhamento_max_abs_A, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_cisalhamento_max_abs_A, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento maxima absoluta no ponto A");
         xlabel("x [m]");
         ylabel("tau_max(x) [Pa]");
 
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, deformacao_normal_A_x, "--;deformacao x;",
+            intervalo_grafico, deformacao_normal_A_y, "-.;deformacao y;",
+            intervalo_grafico, deformacao_normal_A_z, ":;deformacao z;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Deformações normais no ponto A");
+        xlabel("x [m]");
+        ylabel("epsilon(x)");
+
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, deformacao_cisalhamento_A_xy, "--;deformacao xy;",
+            intervalo_grafico, deformacao_cisalhamento_A_yz, "-.;deformacao yz;",
+            intervalo_grafico, deformacao_cisalhamento_A_zx, ":;deformacao zx;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Deformações de cisalhamento no ponto A");
+        xlabel("x [m]");
+        ylabel("gama(x)");
+
 
         # Ponto B
-        figure(15);
-        plot(tensao_normal_B, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_normal_B, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao normal no ponto B");
         xlabel("x [m]");
         ylabel("sigma(x) [Pa]");
 
-        figure(16);
-        plot(tensao_cisalhamento_B_xy, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_cisalhamento_B_xy, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento vertical no ponto B");
         xlabel("x [m]");
         ylabel("tau_xy(x) [Pa]");
 
-        figure(17);
-        plot(tensao_cisalhamento_B_xz, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_cisalhamento_B_xz, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento horizontal no ponto B");
         xlabel("x [m]");
         ylabel("tau_xz(x) [Pa]");
 
-        figure(18);
-        plot(intervalo_grafico, tensao_principal_1_B, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_principal_1_B, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao principal 1 no ponto B");
         xlabel("x [m]");
         ylabel("sigma_1(x) [Pa]");
 
-        figure(19);
-        plot(intervalo_grafico, tensao_principal_2_B, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_principal_2_B, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao principal 2 no ponto B");
         xlabel("x [m]");
         ylabel("sigma_2(x) [Pa]");
 
-        figure(20);
-        plot(intervalo_grafico, tensao_cisalhamento_max_abs_B, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_cisalhamento_max_abs_B, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento maxima absoluta no ponto B");
         xlabel("x [m]");
         ylabel("tau_max(x) [Pa]");
 
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, deformacao_normal_B_x, "--;deformacao x;",
+            intervalo_grafico, deformacao_normal_B_y, "-.;deformacao y;",
+            intervalo_grafico, deformacao_normal_B_z, ":;deformacao z;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Deformações normais no ponto B");
+        xlabel("x [m]");
+        ylabel("epsilon(x)");
+
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, deformacao_cisalhamento_B_xy, "--;deformacao xy;",
+            intervalo_grafico, deformacao_cisalhamento_B_yz, "-.;deformacao yz;",
+            intervalo_grafico, deformacao_cisalhamento_B_zx, ":;deformacao zx;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Deformações de cisalhamento no ponto B");
+        xlabel("x [m]");
+        ylabel("gama(x)");
+
+
         # Ponto C
-        figure(21);
-        plot(tensao_normal_C, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_normal_C, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao normal no ponto C");
         xlabel("x [m]");
         ylabel("sigma(x) [Pa]");
 
-        figure(22);
-        plot(tensao_cisalhamento_C_xy, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_cisalhamento_C_xy, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento vertical no ponto C");
         xlabel("x [m]");
         ylabel("tau_xy(x) [Pa]");
 
-        figure(23);
-        plot(tensao_cisalhamento_C_xz, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_cisalhamento_C_xz, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento horizontal no ponto C");
         xlabel("x [m]");
         ylabel("tau_xz(x) [Pa]");
 
-        figure(24);
-        plot(intervalo_grafico, tensao_principal_1_C, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_principal_1_C, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao principal 1 no ponto C");
         xlabel("x [m]");
         ylabel("sigma_1(x) [Pa]");
 
-        figure(25);
-        plot(intervalo_grafico, tensao_principal_2_C, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_principal_2_C, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao principal 2 no ponto C");
         xlabel("x [m]");
         ylabel("sigma_2(x) [Pa]");
 
-        figure(26);
-        plot(intervalo_grafico, tensao_cisalhamento_max_abs_C, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_cisalhamento_max_abs_C, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento maxima absoluta no ponto C");
         xlabel("x [m]");
         ylabel("tau_max(x) [Pa]");
 
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, deformacao_normal_C_x, "--;deformacao x;",
+            intervalo_grafico, deformacao_normal_C_y, "-.;deformacao y;",
+            intervalo_grafico, deformacao_normal_C_z, ":;deformacao z;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Deformações normais no ponto C");
+        xlabel("x [m]");
+        ylabel("epsilon(x)");
+
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, deformacao_cisalhamento_C_xy, "--;deformacao xy;",
+            intervalo_grafico, deformacao_cisalhamento_C_yz, "-.;deformacao yz;",
+            intervalo_grafico, deformacao_cisalhamento_C_zx, ":;deformacao zx;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Deformações de cisalhamento no ponto C");
+        xlabel("x [m]");
+        ylabel("gama(x)");
+
+
         # Ponto D
-        figure(27);
-        plot(tensao_normal_D, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_normal_D, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao normal no ponto D");
         xlabel("x [m]");
         ylabel("sigma(x) [Pa]");
 
-        figure(28);
-        plot(tensao_cisalhamento_D_xy, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_cisalhamento_D_xy, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento vertical no ponto D");
         xlabel("x [m]");
         ylabel("tau_xy(x) [Pa]");
 
-        figure(29);
-        plot(tensao_cisalhamento_D_xz, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(tensao_cisalhamento_D_xz, [0, viga.width], "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento horizontal no ponto D");
         xlabel("x [m]");
         ylabel("tau_xz(x) [Pa]");
 
-        figure(30);
-        plot(intervalo_grafico, tensao_principal_1_D, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_principal_1_D, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao principal 1 no ponto D");
         xlabel("x [m]");
         ylabel("sigma_1(x) [Pa]");
 
-        figure(31);
-        plot(intervalo_grafico, tensao_principal_2_D, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_principal_2_D, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao principal 2 no ponto D");
         xlabel("x [m]");
         ylabel("sigma_2(x) [Pa]");
 
-        figure(32);
-        plot(intervalo_grafico, tensao_cisalhamento_max_abs_D, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(intervalo_grafico, tensao_cisalhamento_max_abs_D, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
         title("Tensao de cisalhamento maxima absoluta no ponto D");
         xlabel("x [m]");
         ylabel("tau_max(x) [Pa]");
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, deformacao_normal_D_x, "--;deformacao x;",
+            intervalo_grafico, deformacao_normal_D_y, "-.;deformacao y;",
+            intervalo_grafico, deformacao_normal_D_z, ":;deformacao z;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Deformações normais no ponto D");
+        xlabel("x [m]");
+        ylabel("epsilon(x)");
+
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, deformacao_cisalhamento_D_xy, "--;deformacao xy;",
+            intervalo_grafico, deformacao_cisalhamento_D_yz, "-.;deformacao yz;",
+            intervalo_grafico, deformacao_cisalhamento_D_zx, ":;deformacao zx;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Deformações de cisalhamento no ponto D");
+        xlabel("x [m]");
+        ylabel("gama(x)");
 
     endif
 
