@@ -64,8 +64,9 @@
 #   'posicao [valor]'   posição de aplicação do torque na viga
 #
 
-viga tipo cilindro raio 2 modulo elastico 12000000000 modulo cisalhamento 63400000000 comprimento 6 limite escoamento 220000000
-apoio tipo fixo posicao 6
-forca vertical valor -6000 posicao 0
-forca vertical valor -4000 posicao 1.5
-carregamento de 3 ate 6 coeficientes -2000
+viga tipo oco raio interno 0.06 raio externo 0.08 modulo elastico 207e9 modulo cisalhamento 793e8 comprimento 1 limite escoamento 290e9
+apoio tipo fixo posicao 0
+forca angulo 58 valor 11000 posicao 1
+forca vertical valor -14000 posicao 0.6
+torque valor 5600 posicao 0.6
+carregamento de 0.04 ate 0.4 coeficientes 3100 0
