@@ -197,8 +197,8 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         tensao_cisalhamento_A = tensao_cisalhamento_cortantes_A + tensao_cisalhamento_torcao_A;
         
         # Tensoes Principais
-        tensao_principal_1_A = tensao_normal_A / 2 + sqrt((tensao_normal_A/2)**2 + tensao_cisalhamento_A**2); 
-        tensao_principal_2_A = tensao_normal_A / 2 - sqrt((tensao_normal_A/2)**2 + tensao_cisalhamento_A**2); 
+        tensao_principal_1_A = tensao_normal_A * (1/ 2) + sqrt((tensao_normal_A * 0.5)**2 + tensao_cisalhamento_A**2); 
+        tensao_principal_2_A = tensao_normal_A * (1/ 2) - sqrt((tensao_normal_A * 0.5)**2 + tensao_cisalhamento_A**2); 
         
         # Tensao de Cisalhamento Máxima Absoluta
         tensao_cisalhamento_max_abs = max(tensao_principal_1_A, tensao_principal_2_A, 0) - min(tensao_principal_1_A, tensao_principal_2_A, 0);
