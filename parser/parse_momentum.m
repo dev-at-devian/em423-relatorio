@@ -19,6 +19,7 @@ function out = parse_momentum(tokens, line)
     end
     momentum = struct("value", value, "position", position);
     momentos{end+1} = momentum;
+    # Aqui invertemos o valor para adotarmos a convenção de esforços internos no corte à direita
     singfun_carregamentos{end+1} = singfun(-2, position, -value);
 
 endfunction

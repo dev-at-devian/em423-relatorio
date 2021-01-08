@@ -19,6 +19,7 @@ function out = parse_torque(tokens, line)
     end
     torque = struct("value", value, "position", position);
     torques{end+1} = torque;
+    # Aqui invertemos o valor para adotarmos a convenção de esforços internos no corte à direita
     singfun_torques{end+1} = singfun(-1, position, -value);
 
 endfunction

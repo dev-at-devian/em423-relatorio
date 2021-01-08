@@ -51,6 +51,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             defineconst(alongamento, apoios{i}.position, 0);
         endif
     endfor
+    alongamento
 
     torque_interno = integrate_noconst(torques);
     torcao = (1 / (viga.shear * viga.Ip)) * integrate(torque_interno);
@@ -60,6 +61,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             defineconst(torcao, apoios{i}.position, 0);
         endif
     endfor
+    torcao
 
 
     figure(1);
@@ -132,18 +134,24 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     if !strcmp(viga.type, "bar")
 
         # Nesse trecho calcularemos:
+        #
         # 1. Tensão normal provocada por força normal
-        #       sigma = forças normais N * (1 / área) (TODO: conferir sinal com referência)
+        #       sigma = forças normais N * (1 / área)
+        # onde
+        #       forças normais N positivas estão "saindo" da normal dessa face que analisamos, assim
+        #       como o sigma da face. Nessas condições, não precisamos alterar o sinal.
+        #
         # 2. Tensão normal provocada por momento
         #       sigma = - momento M * posição no eixo y * (1 / momento de inércia no eixo y, Iy)
         # onde
         #       usamos momento de inércia no eixo y, Iy, tirado dos exercícios da aula 9 (estava na
         #       dúvida se usávamos I polar, mas estamos vendo um corte em y de fato)
         # e ainda
-        #       trocamos o sinal pois fazemos o corte na referência do cubo, então estamos vendo a
-        #       face cortada que seria a esquerda de x, onde as forças de reação são opostas as que
-        #       utilizamos para calcular esforços internos (como no exercício da aula 9) (TODO: conferir)
-        # 5. Tensão de cisalhamento provocada por torção
+        #       momento M positivo é antihorário na face que analisamos. Nessas condições, haveria
+        #       compressão no topo da viga e tração na parte inferior. Como compressão acontece com
+        #       y positivo mas sua tensão deve ser negativa, temos que ter um sinal negativo na
+        #       fórmula.
+        #
         # 3. Tensão normal resultante
         #       sigma = sigma_normal + sigma_momento
         #
@@ -155,13 +163,27 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         #       Para circular vazada:
         #           fator de correção = (raio externo ^ 2 + raio externo * raio interno + raio interno ^ 2) / (raio externo ^ 2 + raio interno ^ 2)
         # e ainda
-        #       houve troca de sinal pela referência (aula 9, slide 16 usa mesma ref. que nós) (TODO: conferir)
+        #       força cortante V positiva acontece para baixo nessa face, mas o tau dessa face é
+        #       para cima. Nessas condições, a tensão é para baixo com cortante
+        #       positiva e isso é o contrário do tau, então temos que trocar o sinal.
+        # também
+        #       essa tensão é nula nos pontos máximos e mínimos da viga no eixo y.
+        #
         # 5. Tensão de cisalhamento provocada por torção
-        #       tau = - torques internos T * posição no raio * (1 / momento de inércia polar)
+        #       tau = +/- torques internos T * posição no raio * (1 / momento de inércia polar)
         # onde
-        #       houve troca de sinal pela referência (aula 9, slide 16 usa mesma ref. que nós) (TODO: conferir)
+        #       considerando torque T positivo, seu vetor sai da normal da face, o que indica, pela
+        #       regra da mão direita, que no ponto em z negativo, temos T coincidente com o tau da
+        #       face e não precisamos trocar de sinal. Já em pontos de z positivo, temos um T oposto
+        #       ao tau da face, e nesses pontos, devemos trocar o sinal.
+        # e ainda
+        #       Para pontos em y positivo, torque positivo produz tensão horizontal para a esquerda,
+        #       o que coincide com tau da face deste lado. Já em y negativo, precisamos inverter o
+        #       sinal, pois torque positivo produz tensão horizontal para a direita enquanto o tau
+        #       é para a esquerda.
         # 6. Tensão de cisalhamento resultante
         #       tau = tau_cortantes + tau_torcao
+        #
 
 
         # Pegamos o raio dos diferentes tipos de viga cilindrica
@@ -173,63 +195,389 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             fator_correcao = (viga.outer_radius^2 + viga.outer_radius * viga.inner_radius + viga.inner_radius^2) / (viga.outer_radius^2 + viga.inner_radius^2);
         endif
 
+        # Para os gráficos feitos manualmente
+        intervalo_grafico = 0:(viga.width / 8):viga.width;
+
+
         # Ponto A
         # (Maior valor dentro da viga no eixo y, centro do eixo z)
-        # y, z = (viga.raio, 0)
-        # Nesse ponto, nas condições que estudamos, temos:
+        # (y, z) = (+viga.raio, 0)
+        # Nesse ponto, nas condições que estudamos, temos (em valores absolutos):
         # - tensão normal causada por forças normais constante
         # - tensão normal causada por momento MÁXIMA
         # - tensão de cisalhamento causada por força cortante NULA
         # - tensão de cisalhamento causada por torque MÁXIMA (por estar no raio máximo)
 
         # Tensão normal provocada por força normal
-        tensao_normal_normal_A = normal * (1 / viga.area);
-        # Tensão normal provocada por momento 
-        tensao_normal_momento_A = - momentum * raio * (1 / viga.Iy);
+        tensao_normal_normal_A = normal * (1 / viga.area)
+        # Tensão normal provocada por momento
+        tensao_normal_momento_A = - momentum * raio * (1 / viga.Iy)
         # Calculamos a tensão normal resultante
-        tensao_normal_A = tensao_normal_normal_A + tensao_normal_momento_A;
+        tensao_normal_A = tensao_normal_normal_A + tensao_normal_momento_A
 
         # Tensão de cisalhamento provocada por forças cortantes
-        tensao_cisalhamento_cortantes_A = 0; # zero devido posição
+        tensao_cisalhamento_cortantes_A_xy = 0 # zero devido posição
         # Calculamos a tensão de cisalhamento provocada por torção
-        tensao_cisalhamento_torcao_A = torque_interno * raio * (1 / viga.Ip);
+        tensao_cisalhamento_torcao_A_xz = torque_interno * raio * (1 / viga.Ip)
         # Calculamos a tensão de cisalhamento provocada por torção
-        tensao_cisalhamento_A =  tensao_cisalhamento_torcao_A + tensao_cisalhamento_cortantes_A;
-        
-        # Tensoes Principais
-        tensao_principal_1_A = tensao_normal_A * (1/ 2) + sqrt((tensao_normal_A * 0.25 * tensao_normal_A) + tensao_cisalhamento_A * tensao_cisalhamento_A); 
-        tensao_principal_2_A = tensao_normal_A * (1/ 2) - sqrt((tensao_normal_A * 0.25 * tensao_normal_A) + tensao_cisalhamento_A * tensao_cisalhamento_A); 
-        
-        # Tensao de Cisalhamento Máxima Absoluta
-        tensao_cisalhamento_max_abs = max(tensao_principal_1_A, tensao_principal_2_A, 0) - min(tensao_principal_1_A, tensao_principal_2_A, 0);
+        tensao_cisalhamento_A_xy = tensao_cisalhamento_cortantes_A_xy
+        tensao_cisalhamento_A_xz = tensao_cisalhamento_torcao_A_xz
 
+        # Tensões principais e de cisalhamento máxima abs. calculadas em função de x
+        tensao_principal_1_A = [];
+        tensao_principal_2_A = [];
+        tensao_cisalhamento_max_abs_A = [];
+        # Laço para fazer o gráfico, vários pontos em toda a viga
+        for posicao_x = intervalo_grafico
+            # Pegamos os valores na posição atual
+            tensao_normal_A_ = tensao_normal_A(posicao_x);
+            tensao_cisalhamento_A_xz_ = tensao_cisalhamento_A_xz(posicao_x);
+
+            tensao_principal_termo_A = sqrt((tensao_normal_A_ / 2)^2 + (tensao_cisalhamento_A_xz_)^2);
+            tensao_principal_1_A_ = (tensao_normal_A_ / 2) + tensao_principal_termo_A;
+            tensao_principal_2_A_ = (tensao_normal_A_ / 2) - tensao_principal_termo_A;
+            tensao_principal_1_A(end+1) = tensao_principal_1_A_;
+            tensao_principal_2_A(end+1) = tensao_principal_2_A_;
+
+            # Tensao de cisalhamento máxima absoluta
+            tensao_cisalhamento_max_abs_A_ = (max([tensao_principal_1_A_, tensao_principal_2_A_, 0]) - min([tensao_principal_1_A_, tensao_principal_2_A_, 0])) / 2;
+            tensao_cisalhamento_max_abs_A(end+1) = tensao_cisalhamento_max_abs_A_;
+        endfor
 
         # Ponto B
         # (Centro do eixo y e maior valor dentro da viga no eixo z)
-        # y, z = (viga.raio, 0)
-        # Nesse ponto, nas condições que estudamos, temos:
+        # (y, z) = (0, +viga.raio)
+        # Nesse ponto, nas condições que estudamos, temos (em valores absolutos):
         # - tensão normal causada por forças normais constante
         # - tensão normal causada por momento NULA
         # - tensão de cisalhamento causada por força cortante MÁXIMA
         # - tensão de cisalhamento causada por torque MÁXIMA (por estar no raio máximo)
-#  formula pra usar depois
-# (4 / 3) * forca_cortante * (1 / viga.area) * fator_correcao
+
+        # Tensão normal provocada por força normal
+        tensao_normal_normal_B = normal * (1 / viga.area)
+        # Tensão normal provocada por momento
+        tensao_normal_momento_B = 0 # zero devido posição
+        # Calculamos a tensão normal resultante
+        tensao_normal_B = tensao_normal_normal_B + tensao_normal_momento_B
+
+        # Tensão de cisalhamento provocada por forças cortantes
+        tensao_cisalhamento_cortantes_B_xy = - (4 / 3) * forca_cortante * (1 / viga.area) * fator_correcao
+        # Calculamos a tensão de cisalhamento provocada por torção
+        tensao_cisalhamento_torcao_B_xy = - torque_interno * raio * (1 / viga.Ip) # negativo pela posição
+        # Calculamos a tensão de cisalhamento provocada por torção
+        tensao_cisalhamento_B_xy = tensao_cisalhamento_torcao_B_xy + tensao_cisalhamento_cortantes_B_xy
+        tensao_cisalhamento_B_xz = 0
+
+        # Tensões principais e de cisalhamento máxima abs. calculadas em função de x
+        tensao_principal_1_B = [];
+        tensao_principal_2_B = [];
+        tensao_cisalhamento_max_abs_B = [];
+        # Laço para fazer o gráfico, vários pontos em toda a viga
+        for posicao_x = intervalo_grafico
+            # Pegamos os valores na posição atual
+            tensao_normal_B_ = tensao_normal_B(posicao_x);
+            tensao_cisalhamento_B_xy_ = tensao_cisalhamento_B_xy(posicao_x);
+
+            tensao_principal_termo_B = sqrt((tensao_normal_B_ / 2)^2 + (tensao_cisalhamento_B_xy_)^2);
+            tensao_principal_1_B_ = (tensao_normal_B_ / 2) + tensao_principal_termo_B;
+            tensao_principal_2_B_ = (tensao_normal_B_ / 2) - tensao_principal_termo_B;
+            tensao_principal_1_B(end+1) = tensao_principal_1_B_;
+            tensao_principal_2_B(end+1) = tensao_principal_2_B_;
+
+            # Tensao de cisalhamento máxima absoluta
+            tensao_cisalhamento_max_abs_B_ = (max([tensao_principal_1_B_, tensao_principal_2_B_, 0]) - min([tensao_principal_1_B_, tensao_principal_2_B_, 0])) / 2;
+            tensao_cisalhamento_max_abs_B(end+1) = tensao_cisalhamento_max_abs_B_;
+        endfor
+
+        # Ponto C
+        # (Centro do eixo y e maior valor dentro da viga no eixo z)
+        # (y, z) = (-viga.raio, 0)
+        # Nesse ponto, nas condições que estudamos, temos (em valores absolutos):
+        # - tensão normal causada por forças normais constante
+        # - tensão normal causada por momento MÁXIMA
+        # - tensão de cisalhamento causada por força cortante NULA
+        # - tensão de cisalhamento causada por torque MÁXIMA (por estar no raio máximo)
+
+        # Tensão normal provocada por força normal
+        tensao_normal_normal_C = normal * (1 / viga.area)
+        # Tensão normal provocada por momento
+        tensao_normal_momento_C = - momentum * (-raio) * (1 / viga.Iy)
+        # Calculamos a tensão normal resultante
+        tensao_normal_C = tensao_normal_normal_C + tensao_normal_momento_C
+
+        # Tensão de cisalhamento provocada por forças cortantes
+        tensao_cisalhamento_cortantes_C_xy = 0 # zero devido posição
+        # Calculamos a tensão de cisalhamento provocada por torção
+        tensao_cisalhamento_torcao_C_xz = - torque_interno * raio * (1 / viga.Ip) # negativo pela posição
+        # Calculamos a tensão de cisalhamento provocada por torção
+        tensao_cisalhamento_C_xy = tensao_cisalhamento_cortantes_C_xy
+        tensao_cisalhamento_C_xz = tensao_cisalhamento_torcao_C_xz
+
+        # Tensões principais e de cisalhamento máxima abs. calculadas em função de x
+        tensao_principal_1_C = [];
+        tensao_principal_2_C = [];
+        tensao_cisalhamento_max_abs_C = [];
+        # Laço para fazer o gráfico, vários pontos em toda a viga
+        for posicao_x = intervalo_grafico
+            # Pegamos os valores na posição atual
+            tensao_normal_C_ = tensao_normal_C(posicao_x);
+            tensao_cisalhamento_C_xz_ = tensao_cisalhamento_C_xz(posicao_x);
+
+            tensao_principal_termo_C = sqrt((tensao_normal_C_ / 2)^2 + (tensao_cisalhamento_C_xz_)^2);
+            tensao_principal_1_C_ = (tensao_normal_C_ / 2) + tensao_principal_termo_C;
+            tensao_principal_2_C_ = (tensao_normal_C_ / 2) - tensao_principal_termo_C;
+            tensao_principal_1_C(end+1) = tensao_principal_1_C_;
+            tensao_principal_2_C(end+1) = tensao_principal_2_C_;
+
+            # Tensao de cisalhamento máxima absoluta
+            tensao_cisalhamento_max_abs_C_ = (max([tensao_principal_1_C_, tensao_principal_2_C_, 0]) - min([tensao_principal_1_C_, tensao_principal_2_C_, 0])) / 2;
+            tensao_cisalhamento_max_abs_C(end+1) = tensao_cisalhamento_max_abs_C_;
+        endfor
+
+        # Ponto D
+        # (Centro do eixo y e maior valor dentro da viga no eixo z)
+        # (y, z) = (0, -viga.raio)
+        # Nesse ponto, nas condições que estudamos, temos (em valores absolutos):
+        # - tensão normal causada por forças normais constante
+        # - tensão normal causada por momento NULA
+        # - tensão de cisalhamento causada por força cortante MÁXIMA
+        # - tensão de cisalhamento causada por torque MÁXIMA (por estar no raio máximo)
+
+        # Tensão normal provocada por força normal
+        tensao_normal_normal_D = normal * (1 / viga.area)
+        # Tensão normal provocada por momento
+        tensao_normal_momento_D = 0 # zero devido posição
+        # Calculamos a tensão normal resultante
+        tensao_normal_D = tensao_normal_normal_D + tensao_normal_momento_D
+
+        # Tensão de cisalhamento provocada por forças cortantes
+        tensao_cisalhamento_cortantes_D_xy = - (4 / 3) * forca_cortante * (1 / viga.area) * fator_correcao
+        # Calculamos a tensão de cisalhamento provocada por torção
+        tensao_cisalhamento_torcao_D_xy = torque_interno * raio * (1 / viga.Ip)
+        # Calculamos a tensão de cisalhamento provocada por torção
+        tensao_cisalhamento_D_xy = tensao_cisalhamento_torcao_D_xy + tensao_cisalhamento_cortantes_D_xy
+        tensao_cisalhamento_D_xz = 0
+
+        # Tensões principais e de cisalhamento máxima abs. calculadas em função de x
+        tensao_principal_1_D = [];
+        tensao_principal_2_D = [];
+        tensao_cisalhamento_max_abs_D = [];
+        # Laço para fazer o gráfico, vários pontos em toda a viga
+        for posicao_x = intervalo_grafico
+            # Pegamos os valores na posição atual
+            tensao_normal_D_ = tensao_normal_D(posicao_x);
+            tensao_cisalhamento_D_xy_ = tensao_cisalhamento_D_xy(posicao_x);
+
+            tensao_principal_termo_D = sqrt((tensao_normal_D_ / 2)^2 + (tensao_cisalhamento_D_xy_)^2);
+            tensao_principal_1_D_ = (tensao_normal_D_ / 2) + tensao_principal_termo_D;
+            tensao_principal_2_D_ = (tensao_normal_D_ / 2) - tensao_principal_termo_D;
+            tensao_principal_1_D(end+1) = tensao_principal_1_D_;
+            tensao_principal_2_D(end+1) = tensao_principal_2_D_;
+
+            # Tensao de cisalhamento máxima absoluta
+            tensao_cisalhamento_max_abs_D_ = (max([tensao_principal_1_D_, tensao_principal_2_D_, 0]) - min([tensao_principal_1_D_, tensao_principal_2_D_, 0])) / 2;
+            tensao_cisalhamento_max_abs_D(end+1) = tensao_cisalhamento_max_abs_D_;
+        endfor
+
+        # Graficamos nossos resultados anteriores
+        #
+        # Ponto A
 
         figure(9);
-        plot(tensao_normal_A, [0, viga.width], "linewidth", 2, "color", [0.192, 0.106, 0.573]);
+        plot(tensao_normal_A, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
-        title("Tensao normal no ponto  A");
+        title("Tensao normal no ponto A");
         xlabel("x [m]");
         ylabel("sigma(x) [Pa]");
 
         figure(10);
-        plot(tensao_cisalhamento_A, [0, viga.width], "linewidth", 2, "color", [0.192, 0.106, 0.573]);
+        plot(tensao_cisalhamento_A_xy, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
         grid on;
         set(gca, "fontsize", 12);
-        title("Tensao de cisalhamento no ponto  A");
+        title("Tensao de cisalhamento vertical no ponto A");
         xlabel("x [m]");
-        ylabel("tau(x) [Pa]");
+        ylabel("tau_xy(x) [Pa]");
+
+        figure(11);
+        plot(tensao_cisalhamento_A_xz, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento horizontal no ponto A");
+        xlabel("x [m]");
+        ylabel("tau_xz(x) [Pa]");
+
+        figure(12);
+        plot(intervalo_grafico, tensao_principal_1_A, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao principal 1 no ponto A");
+        xlabel("x [m]");
+        ylabel("sigma_1(x) [Pa]");
+
+        figure(13);
+        plot(intervalo_grafico, tensao_principal_2_A, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao principal 2 no ponto A");
+        xlabel("x [m]");
+        ylabel("sigma_2(x) [Pa]");
+
+        figure(14);
+        plot(intervalo_grafico, tensao_cisalhamento_max_abs_A, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento maxima absoluta no ponto A");
+        xlabel("x [m]");
+        ylabel("tau_max(x) [Pa]");
+
+
+        # Ponto B
+        figure(15);
+        plot(tensao_normal_B, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao normal no ponto B");
+        xlabel("x [m]");
+        ylabel("sigma(x) [Pa]");
+
+        figure(16);
+        plot(tensao_cisalhamento_B_xy, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento vertical no ponto B");
+        xlabel("x [m]");
+        ylabel("tau_xy(x) [Pa]");
+
+        figure(17);
+        plot(tensao_cisalhamento_B_xz, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento horizontal no ponto B");
+        xlabel("x [m]");
+        ylabel("tau_xz(x) [Pa]");
+
+        figure(18);
+        plot(intervalo_grafico, tensao_principal_1_B, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao principal 1 no ponto B");
+        xlabel("x [m]");
+        ylabel("sigma_1(x) [Pa]");
+
+        figure(19);
+        plot(intervalo_grafico, tensao_principal_2_B, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao principal 2 no ponto B");
+        xlabel("x [m]");
+        ylabel("sigma_2(x) [Pa]");
+
+        figure(20);
+        plot(intervalo_grafico, tensao_cisalhamento_max_abs_B, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento maxima absoluta no ponto B");
+        xlabel("x [m]");
+        ylabel("tau_max(x) [Pa]");
+
+        # Ponto C
+        figure(21);
+        plot(tensao_normal_C, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao normal no ponto C");
+        xlabel("x [m]");
+        ylabel("sigma(x) [Pa]");
+
+        figure(22);
+        plot(tensao_cisalhamento_C_xy, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento vertical no ponto C");
+        xlabel("x [m]");
+        ylabel("tau_xy(x) [Pa]");
+
+        figure(23);
+        plot(tensao_cisalhamento_C_xz, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento horizontal no ponto C");
+        xlabel("x [m]");
+        ylabel("tau_xz(x) [Pa]");
+
+        figure(24);
+        plot(intervalo_grafico, tensao_principal_1_C, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao principal 1 no ponto C");
+        xlabel("x [m]");
+        ylabel("sigma_1(x) [Pa]");
+
+        figure(25);
+        plot(intervalo_grafico, tensao_principal_2_C, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao principal 2 no ponto C");
+        xlabel("x [m]");
+        ylabel("sigma_2(x) [Pa]");
+
+        figure(26);
+        plot(intervalo_grafico, tensao_cisalhamento_max_abs_C, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento maxima absoluta no ponto C");
+        xlabel("x [m]");
+        ylabel("tau_max(x) [Pa]");
+
+        # Ponto D
+        figure(27);
+        plot(tensao_normal_D, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao normal no ponto D");
+        xlabel("x [m]");
+        ylabel("sigma(x) [Pa]");
+
+        figure(28);
+        plot(tensao_cisalhamento_D_xy, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento vertical no ponto D");
+        xlabel("x [m]");
+        ylabel("tau_xy(x) [Pa]");
+
+        figure(29);
+        plot(tensao_cisalhamento_D_xz, [0, viga.width], "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento horizontal no ponto D");
+        xlabel("x [m]");
+        ylabel("tau_xz(x) [Pa]");
+
+        figure(30);
+        plot(intervalo_grafico, tensao_principal_1_D, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao principal 1 no ponto D");
+        xlabel("x [m]");
+        ylabel("sigma_1(x) [Pa]");
+
+        figure(31);
+        plot(intervalo_grafico, tensao_principal_2_D, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao principal 2 no ponto D");
+        xlabel("x [m]");
+        ylabel("sigma_2(x) [Pa]");
+
+        figure(32);
+        plot(intervalo_grafico, tensao_cisalhamento_max_abs_D, "linewidth", 2, "color", [1, 0.106, 0.573]);
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Tensao de cisalhamento maxima absoluta no ponto D");
+        xlabel("x [m]");
+        ylabel("tau_max(x) [Pa]");
 
     endif
 
