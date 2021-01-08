@@ -247,6 +247,8 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         deformacao_cisalhamento_A_xy = [];
         deformacao_cisalhamento_A_yz = [];
         deformacao_cisalhamento_A_zx = [];
+        n_tresca_A = [];
+        n_von_mises_A = [];
         # Laço para fazer o gráfico, vários pontos em toda a viga
         for posicao_x = intervalo_grafico
             # Pegamos os valores na posição atual
@@ -259,9 +261,15 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             tensao_principal_1_A(end+1) = tensao_principal_1_A_;
             tensao_principal_2_A(end+1) = tensao_principal_2_A_;
 
+            # Fazemos sigma
+            sigmas = [tensao_principal_1_A_, tensao_principal_2_A_, 0];
+            sigmas = sort(sigmas);
+            sigma_1 = sigmas(1);
+            sigma_2 = sigmas(2);
+            sigma_3 = sigmas(3);
+
             # Tensao de cisalhamento máxima absoluta
-            tensao_cisalhamento_max_abs_A_ = (max([tensao_principal_1_A_, tensao_principal_2_A_, 0]) - min([tensao_principal_1_A_, tensao_principal_2_A_, 0])) / 2;
-            tensao_cisalhamento_max_abs_A(end+1) = tensao_cisalhamento_max_abs_A_;
+            tensao_cisalhamento_max_abs_A(end+1) = (sigma_1 - sigma_3) / 2;
 
             # Deformação normal
             deformacao_normal_A_x(end+1) = tensao_normal_A_ / E;
@@ -271,6 +279,13 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             deformacao_cisalhamento_A_xy(end+1) = 0; # é zerada
             deformacao_cisalhamento_A_yz(end+1) = 0; # não possuímos tau_yz
             deformacao_cisalhamento_A_zx(end+1) = tensao_cisalhamento_A_xz_ / G;
+
+            # Calculamos Tresca
+            n_tresca_A(end+1) = log10(viga.yield_strength / (sigma_1 - sigma_3));
+
+            # Calculamos Von Mises
+            sigma_ = sqrt(((sigma_1 - sigma_2)^2 + (sigma_2 - sigma_3)^2 + (sigma_3 - sigma_1)^2) / 2);
+            n_von_mises_A(end+1) = log10(viga.yield_strength / sigma_);
         endfor
 
         # Ponto B
@@ -307,6 +322,8 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         deformacao_cisalhamento_B_xy = [];
         deformacao_cisalhamento_B_yz = [];
         deformacao_cisalhamento_B_zx = [];
+        n_tresca_B = [];
+        n_von_mises_B = [];
         # Laço para fazer o gráfico, vários pontos em toda a viga
         for posicao_x = intervalo_grafico
             # Pegamos os valores na posição atual
@@ -319,9 +336,15 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             tensao_principal_1_B(end+1) = tensao_principal_1_B_;
             tensao_principal_2_B(end+1) = tensao_principal_2_B_;
 
+            # Fazemos sigma
+            sigmas = [tensao_principal_1_B_, tensao_principal_2_B_, 0];
+            sigmas = sort(sigmas);
+            sigma_1 = sigmas(1);
+            sigma_2 = sigmas(2);
+            sigma_3 = sigmas(3);
+
             # Tensao de cisalhamento máxima absoluta
-            tensao_cisalhamento_max_abs_B_ = (max([tensao_principal_1_B_, tensao_principal_2_B_, 0]) - min([tensao_principal_1_B_, tensao_principal_2_B_, 0])) / 2;
-            tensao_cisalhamento_max_abs_B(end+1) = tensao_cisalhamento_max_abs_B_;
+            tensao_cisalhamento_max_abs_B(end+1) = (sigma_1 - sigma_3) / 2;
 
             # Deformação normal
             deformacao_normal_B_x(end+1) = tensao_normal_B_ / E;
@@ -331,6 +354,13 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             deformacao_cisalhamento_B_xy(end+1) = tensao_cisalhamento_B_xy_ / G;
             deformacao_cisalhamento_B_yz(end+1) = 0; # não possuímos tau_yz
             deformacao_cisalhamento_B_zx(end+1) = 0; # é zerada
+
+            # Calculamos Tresca
+            n_tresca_B(end+1) = log10(viga.yield_strength / (sigma_1 - sigma_3));
+
+            # Calculamos Von Mises
+            sigma_ = sqrt(((sigma_1 - sigma_2)^2 + (sigma_2 - sigma_3)^2 + (sigma_3 - sigma_1)^2) / 2);
+            n_von_mises_B(end+1) = log10(viga.yield_strength / sigma_);
         endfor
 
         # Ponto C
@@ -367,6 +397,8 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         deformacao_cisalhamento_C_xy = [];
         deformacao_cisalhamento_C_yz = [];
         deformacao_cisalhamento_C_zx = [];
+        n_tresca_C = [];
+        n_von_mises_C = [];
         # Laço para fazer o gráfico, vários pontos em toda a viga
         for posicao_x = intervalo_grafico
             # Pegamos os valores na posição atual
@@ -379,9 +411,15 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             tensao_principal_1_C(end+1) = tensao_principal_1_C_;
             tensao_principal_2_C(end+1) = tensao_principal_2_C_;
 
+            # Fazemos sigma
+            sigmas = [tensao_principal_1_C_, tensao_principal_2_C_, 0];
+            sigmas = sort(sigmas);
+            sigma_1 = sigmas(1);
+            sigma_2 = sigmas(2);
+            sigma_3 = sigmas(3);
+
             # Tensao de cisalhamento máxima absoluta
-            tensao_cisalhamento_max_abs_C_ = (max([tensao_principal_1_C_, tensao_principal_2_C_, 0]) - min([tensao_principal_1_C_, tensao_principal_2_C_, 0])) / 2;
-            tensao_cisalhamento_max_abs_C(end+1) = tensao_cisalhamento_max_abs_C_;
+            tensao_cisalhamento_max_abs_C(end+1) = (sigma_1 - sigma_3) / 2;
 
             # Deformação normal
             deformacao_normal_C_x(end+1) = tensao_normal_C_ / E;
@@ -391,6 +429,13 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             deformacao_cisalhamento_C_xy(end+1) = 0; # é zerada
             deformacao_cisalhamento_C_yz(end+1) = 0; # não possuímos tau_yz
             deformacao_cisalhamento_C_zx(end+1) = tensao_cisalhamento_C_xz_ / G;
+
+            # Calculamos Tresca
+            n_tresca_C(end+1) = log10(viga.yield_strength / (sigma_1 - sigma_3));
+
+            # Calculamos Von Mises
+            sigma_ = sqrt(((sigma_1 - sigma_2)^2 + (sigma_2 - sigma_3)^2 + (sigma_3 - sigma_1)^2) / 2);
+            n_von_mises_C(end+1) = log10(viga.yield_strength / sigma_);
         endfor
 
         # Ponto D
@@ -427,6 +472,8 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         deformacao_cisalhamento_D_xy = [];
         deformacao_cisalhamento_D_yz = [];
         deformacao_cisalhamento_D_zx = [];
+        n_tresca_D = [];
+        n_von_mises_D = [];
         # Laço para fazer o gráfico, vários pontos em toda a viga
         for posicao_x = intervalo_grafico
             # Pegamos os valores na posição atual
@@ -439,9 +486,15 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             tensao_principal_1_D(end+1) = tensao_principal_1_D_;
             tensao_principal_2_D(end+1) = tensao_principal_2_D_;
 
+            # Fazemos sigma
+            sigmas = [tensao_principal_1_D_, tensao_principal_2_D_, 0];
+            sigmas = sort(sigmas);
+            sigma_1 = sigmas(1);
+            sigma_2 = sigmas(2);
+            sigma_3 = sigmas(3);
+
             # Tensao de cisalhamento máxima absoluta
-            tensao_cisalhamento_max_abs_D_ = (max([tensao_principal_1_D_, tensao_principal_2_D_, 0]) - min([tensao_principal_1_D_, tensao_principal_2_D_, 0])) / 2;
-            tensao_cisalhamento_max_abs_D(end+1) = tensao_cisalhamento_max_abs_D_;
+            tensao_cisalhamento_max_abs_D(end+1) = (sigma_1 - sigma_3) / 2;
 
             # Deformação normal
             deformacao_normal_D_x(end+1) = tensao_normal_D_ / E;
@@ -451,6 +504,13 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
             deformacao_cisalhamento_D_xy(end+1) = tensao_cisalhamento_D_xy_ / G;
             deformacao_cisalhamento_D_yz(end+1) = 0; # não possuímos tau_yz
             deformacao_cisalhamento_D_zx(end+1) = 0; # é zerada
+
+            # Calculamos Tresca
+            n_tresca_D(end+1) = log10(viga.yield_strength / (sigma_1 - sigma_3));
+
+            # Calculamos Von Mises
+            sigma_ = sqrt(((sigma_1 - sigma_2)^2 + (sigma_2 - sigma_3)^2 + (sigma_3 - sigma_1)^2) / 2);
+            n_von_mises_D(end+1) = log10(viga.yield_strength / sigma_);
         endfor
 
         # Graficamos nossos resultados anteriores
@@ -524,7 +584,6 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         xlabel("x [m]");
         ylabel("epsilon(x)");
 
-
         figure(figura_atual);
         figura_atual = figura_atual + 1;
         plot(
@@ -537,6 +596,18 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         title("Deformações de cisalhamento no ponto A");
         xlabel("x [m]");
         ylabel("gama(x)");
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, n_tresca_A, "--;log n Tresca;",
+            intervalo_grafico, n_von_mises_A, ":;log n Von Mises;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Coeficientes de segurança no ponto A");
+        xlabel("x [m]");
+        ylabel("log10 n(x)");
 
 
         # Ponto B
@@ -607,7 +678,6 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         xlabel("x [m]");
         ylabel("epsilon(x)");
 
-
         figure(figura_atual);
         figura_atual = figura_atual + 1;
         plot(
@@ -620,6 +690,18 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         title("Deformações de cisalhamento no ponto B");
         xlabel("x [m]");
         ylabel("gama(x)");
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, n_tresca_B, "--;log n Tresca;",
+            intervalo_grafico, n_von_mises_B, ":;log n Von Mises;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Coeficientes de segurança no ponto B");
+        xlabel("x [m]");
+        ylabel("log10 n(x)");
 
 
         # Ponto C
@@ -690,7 +772,6 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         xlabel("x [m]");
         ylabel("epsilon(x)");
 
-
         figure(figura_atual);
         figura_atual = figura_atual + 1;
         plot(
@@ -703,6 +784,18 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         title("Deformações de cisalhamento no ponto C");
         xlabel("x [m]");
         ylabel("gama(x)");
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, n_tresca_C, "--;log n Tresca;",
+            intervalo_grafico, n_von_mises_C, ":;log n Von Mises;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Coeficientes de segurança no ponto C");
+        xlabel("x [m]");
+        ylabel("log10 n(x)");
 
 
         # Ponto D
@@ -773,7 +866,6 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         xlabel("x [m]");
         ylabel("epsilon(x)");
 
-
         figure(figura_atual);
         figura_atual = figura_atual + 1;
         plot(
@@ -786,6 +878,18 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         title("Deformações de cisalhamento no ponto D");
         xlabel("x [m]");
         ylabel("gama(x)");
+
+        figure(figura_atual);
+        figura_atual = figura_atual + 1;
+        plot(
+            intervalo_grafico, n_tresca_D, "--;log n Tresca;",
+            intervalo_grafico, n_von_mises_D, ":;log n Von Mises;"
+        );
+        grid on;
+        set(gca, "fontsize", 12);
+        title("Coeficientes de segurança no ponto D");
+        xlabel("x [m]");
+        ylabel("log10 n(x)");
 
     endif
 
