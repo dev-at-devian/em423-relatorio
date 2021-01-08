@@ -43,7 +43,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     deflexao
 
 
-    normal = integrate_noconst(forcas_x);
+    normal = integrate_noconst(forcas_x)
     alongamento = (1 / (viga.area * viga.elasticity)) * integrate(normal);
     # A constante será dada pelo apoio (o apoio fixo ou pino), onde o alongamento é nulo
     for i = 1:length(apoios)
