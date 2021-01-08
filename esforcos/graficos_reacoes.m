@@ -184,7 +184,7 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
 
         # Tensão normal provocada por força normal
         tensao_normal_normal_A = normal * (1 / viga.area);
-        # Tensão normal provocada por momento
+        # Tensão normal provocada por momento 
         tensao_normal_momento_A = - momentum * raio * (1 / viga.Iy);
         # Calculamos a tensão normal resultante
         tensao_normal_A = tensao_normal_normal_A + tensao_normal_momento_A;
@@ -194,11 +194,11 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         # Calculamos a tensão de cisalhamento provocada por torção
         tensao_cisalhamento_torcao_A = torque_interno * raio * (1 / viga.Ip);
         # Calculamos a tensão de cisalhamento provocada por torção
-        tensao_cisalhamento_A = tensao_cisalhamento_cortantes_A + tensao_cisalhamento_torcao_A;
+        tensao_cisalhamento_A =  tensao_cisalhamento_torcao_A + tensao_cisalhamento_cortantes_A;
         
         # Tensoes Principais
-        tensao_principal_1_A = tensao_normal_A * (1/ 2) + sqrt((tensao_normal_A * 0.5)**2 + tensao_cisalhamento_A**2); 
-        tensao_principal_2_A = tensao_normal_A * (1/ 2) - sqrt((tensao_normal_A * 0.5)**2 + tensao_cisalhamento_A**2); 
+        tensao_principal_1_A = tensao_normal_A * (1/ 2) + sqrt((tensao_normal_A * 0.25 * tensao_normal_A) + tensao_cisalhamento_A * tensao_cisalhamento_A); 
+        tensao_principal_2_A = tensao_normal_A * (1/ 2) - sqrt((tensao_normal_A * 0.25 * tensao_normal_A) + tensao_cisalhamento_A * tensao_cisalhamento_A); 
         
         # Tensao de Cisalhamento Máxima Absoluta
         tensao_cisalhamento_max_abs = max(tensao_principal_1_A, tensao_principal_2_A, 0) - min(tensao_principal_1_A, tensao_principal_2_A, 0);
