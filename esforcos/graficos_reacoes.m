@@ -1,4 +1,5 @@
 function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x, singfun_torques)
+    global program_logger;
     forcas_y = singfunsum();
     forca_cortante = singfunsum();
     momentum = singfunsum();
@@ -29,6 +30,13 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     momentum = integrate_noconst(forca_cortante)
 
     inclinacao = (1 / (viga.Iz * viga.elasticity)) * integrate(momentum);
+    program_logger.write_string("\\subsection{Inclinação}");
+
+    program_logger.write_string("\\[{\\scriptstyle \\theta (x) = \\frac{1}{EI} \\int_{}^{} M(x) \\,dx }\\]");
+    program_logger.write_string("\\[{\\scriptscriptstyle \\theta (0) = ");
+    program_logger.write_string(program_logger.string_form_evaluated(inclinacao, "0"));
+    program_logger.write_string(" = 0 }\\]");
+
     # A constante será dada pelo apoio fixo, onde a inclinacão é nula
     for i = 1:length(apoios)
         if !isnan(apoios{i}.momentum)
@@ -37,14 +45,41 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     endfor
     inclinacao
 
+    program_logger.write_string("\\[{\\scriptscriptstyle \\theta (x) = ");
+    program_logger.write_string(program_logger.string_form(inclinacao));
+    program_logger.write_string("}\\]");
+
     deflexao = integrate(inclinacao);
+
+    program_logger.write_string("\\subsection{Deflexão}");
+
+    program_logger.write_string("\\[{\\scriptstyle v(x) = \\int_{}^{} \\theta (x) \\,dx }\\]");
+    program_logger.write_string("\\[{\\scriptscriptstyle v(0) = ");
+    program_logger.write_string(program_logger.string_form_evaluated(deflexao, "0"));
+    program_logger.write_string(" = 0 }\\]");
+
+
+
     # A constante será dada por qualquer apoio fixo, rolete ou pino, onde a deflexão é nula
     defineconst(deflexao, apoios{1}.position, 0);
     deflexao
 
+    program_logger.write_string("\\[{\\scriptscriptstyle v (x) = ");
+    program_logger.write_string(program_logger.string_form(deflexao));
+    program_logger.write_string("}\\]");
+
+
 
     normal = integrate_noconst(forcas_x)
     alongamento = (1 / (viga.area * viga.elasticity)) * integrate(normal);
+    program_logger.write_string("\\subsection{Alongamento}");
+
+    program_logger.write_string("\\[{\\scriptstyle \\Delta L (x) = \\frac{1}{EA} \\int_{}^{} N(x) \\,dx }\\]");
+    program_logger.write_string("\\[{\\scriptscriptstyle \\Delta L (0) = ");
+    program_logger.write_string(program_logger.string_form_evaluated(alongamento, "0"));
+    program_logger.write_string(" = 0 }\\]");
+
+
     # A constante será dada pelo apoio (o apoio fixo ou pino), onde o alongamento é nulo
     for i = 1:length(apoios)
         if !isnan(apoios{i}.horizontal)
@@ -53,8 +88,21 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     endfor
     alongamento
 
+    program_logger.write_string("\\[{\\scriptscriptstyle \\Delta L (x) = ");
+    program_logger.write_string(program_logger.string_form(alongamento));
+    program_logger.write_string("}\\]");
+
+
     torque_interno = integrate_noconst(torques);
     torcao = (1 / (viga.shear * viga.Ip)) * integrate(torque_interno);
+    program_logger.write_string("\\subsection{Torção}");
+
+    program_logger.write_string("\\[{\\scriptstyle \\phi (x) = \\frac{1}{GI_{p}} \\int_{}^{} M_{x}(x) \\,dx }\\]");
+    program_logger.write_string("\\[{\\scriptscriptstyle \\phi (0) = ");
+    program_logger.write_string(program_logger.string_form_evaluated(torcao, "0"));
+    program_logger.write_string(" = 0 }\\]");
+
+
     # A constante será dada pelo apoio (o apoio fixo ou pino), onde o ângulo de torção é nulo
     for i = 1:length(apoios)
         if !isnan(apoios{i}.horizontal)
@@ -63,6 +111,11 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
     endfor
     torque_interno
     torcao
+
+    program_logger.write_string("\\[{\\scriptscriptstyle \\phi (x) = ");
+    program_logger.write_string(program_logger.string_form(torcao));
+    program_logger.write_string("}\\]");
+
 
     figura_atual = 1;
 
@@ -890,7 +943,16 @@ function graficos_reacoes(viga, apoios, singfun_carregamentos, singfun_forcas_x,
         title("Coeficientes de segurança no ponto D");
         xlabel("x [m]");
         ylabel("log10 n(x)");
-
+        
+        program_logger.write_string("\\subsection*{Gráficos}\n");
+        program_logger.write_string("\\begin{center}\n");
+        for i = 1:(figura_atual-1)
+            figure_path = sprintf("img/figure%d.png", i);
+            print(i, figure_path);
+            program_logger.write_string(sprintf("    \\includegraphics[scale=0.25]{figure%d.png}\n", i));
+        endfor
+        program_logger.write_string("\\end{center}\n");
+        
     endif
 
 endfunction

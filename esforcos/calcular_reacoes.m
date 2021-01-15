@@ -4,6 +4,7 @@ function apoios = calcular_reacoes()
     global singfun_carregamentos;
     global singfun_forcas_x;
     global singfun_torques;
+    global program_logger;
 
     # Pegamos as forças definidas em y e momentos
     forcas_y_momentos = singfunsum();
@@ -21,6 +22,12 @@ function apoios = calcular_reacoes()
     # Então teremos 4 equações para determinar tanto as forças de reação verticais quanto momentos dos apoios
 
     # Determinamos quais incógnitas temos
+
+    program_logger.write_string("\\section*{Equações}\n");
+    program_logger.write_string("\\subsection*{Equação das forças verticais e momentos externos}\n");
+
+    program_logger.write_string("\\[{\\scriptstyle q(x) = ");
+
     incognitas_momentos = {};
     apoio_incognitas_momentos = {};
     incognitas_forcas_y = {};
@@ -30,13 +37,19 @@ function apoios = calcular_reacoes()
             momento = singfun(-2, apoios{i}.position);
             incognitas_momentos{end+1} = momento;
             apoio_incognitas_momentos{end+1} = i;
+            program_logger.write_string(sprintf("M{\\langle x-%d \\rangle}^{%d} + ", apoios{i}.position, -2));
         endif
         if !isnan(apoios{i}.vertical)
             reacao_y = singfun(-1, apoios{i}.position);
             incognitas_forcas_y{end+1} = reacao_y;
             apoio_incognitas_forcas_y{end+1} = i;
+            program_logger.write_string(sprintf("Fy{\\langle x-%d \\rangle}^{%d} + ", apoios{i}.position, -1));
         endif
     endfor
+    
+    program_logger.write_string(program_logger.string_form(forcas_y_momentos));
+    program_logger.write_string("}\\]");
+
     n_incognitas = length(incognitas_momentos) + length(incognitas_forcas_y);
 
     # As incógnitas aparecem nas forças cortantes integradas uma vez e aparecem nos momentos
@@ -93,6 +106,102 @@ function apoios = calcular_reacoes()
         coluna_atual += 1;
     endfor
 
+        #
+        # FORÇAS CORTANTES
+        #
+        program_logger.write_string("\\subsection*{Equação das forças cortantes}\n");
+        program_logger.write_string("\\[{\\scriptstyle V(x) = \\int_{}^{} q(x) \\,dx }\\]");
+        program_logger.write_string("\\[{\\scriptstyle V(x) = ");
+        if (length(incognitas_momentos) > 0)
+            im_int = integrate_noconst(incognitas_momentos{i});
+            program_logger.write_string(sprintf("M{\\langle x-%d \\rangle}^{%d} + ", im_int.a, im_int.degree));
+        endif
+        if (length(incognitas_forcas_y) > 0)
+            ify_int = integrate_noconst(incognitas_forcas_y{i});
+            program_logger.write_string(sprintf("Fy{\\langle x-%d \\rangle}^{%d} + ", ify_int.a, ify_int.degree));
+        endif
+
+        program_logger.write_string(program_logger.string_form(forcas_cortantes));
+        program_logger.write_string("}\\]");
+
+
+        #
+        # MOMENTOS INTERNOS
+        #
+        program_logger.write_string("\\subsection*{Equação dos momentos internos}\n");
+        program_logger.write_string("\\[{\\scriptstyle M(x) = \\int_{}^{} V(x) \\,dx }\\]");
+        program_logger.write_string("\\[{\\scriptstyle M(x) = ");
+        if (length(incognitas_momentos) > 0)
+            im_int = integrate_noconst(integrate_noconst(incognitas_momentos{i}));
+            program_logger.write_string(sprintf("M{\\langle x-%d \\rangle}^{%d} + ", im_int.a, im_int.degree));
+        endif
+        if (length(incognitas_forcas_y) > 0)
+            ify_int = integrate_noconst(integrate_noconst(incognitas_forcas_y{i}));
+            program_logger.write_string(sprintf("Fy{\\langle x-%d \\rangle}^{%d} + ", ify_int.a, ify_int.degree));
+        endif
+
+        program_logger.write_string(program_logger.string_form(momentos_internos));
+        program_logger.write_string("}\\]");
+
+
+        #
+        # REAÇÕES DE APOIO
+        #
+        program_logger.write_string("\\subsection*{Reações de apoio}\n");
+        end_val = sprintf("%d^{+}", viga.width);
+        program_logger.write_string(sprintf("\\[{\\scriptstyle V(%s) = ", end_val));
+        if (length(incognitas_momentos) > 0)
+            im_int = integrate_noconst(incognitas_momentos{i});
+            program_logger.write_string(sprintf("M{\\langle %s-%d \\rangle}^{%d} + ", end_val, im_int.a, im_int.degree));
+        endif
+        if (length(incognitas_forcas_y) > 0)
+            ify_int = integrate_noconst(incognitas_forcas_y{i});
+            program_logger.write_string(sprintf("Fy{\\langle %s-%d \\rangle}^{%d} + ", end_val, ify_int.a, ify_int.degree));
+        endif
+
+        program_logger.write_string(program_logger.string_form_evaluated(forcas_cortantes, end_val));
+        program_logger.write_string(" = 0}\\]");
+        program_logger.write_string(sprintf("\\[{\\scriptstyle V(%s) = ", end_val));
+        if (length(incognitas_momentos) > 0)
+            im_int = integrate_noconst(incognitas_momentos{i});
+            program_logger.write_string(sprintf("M \\cdot %d + ", im_int(viga.width, +1)));
+        endif
+        if (length(incognitas_forcas_y) > 0)
+            ify_int = integrate_noconst(incognitas_forcas_y{i});
+            program_logger.write_string(sprintf("Fy \\cdot %d + ", ify_int(viga.width, +1)));
+        endif
+
+        program_logger.write_string(sprintf("%d ", forcas_cortantes(viga.width, +1)));
+        program_logger.write_string(" = 0}\\]");
+
+        program_logger.write_string(sprintf("\\[{\\scriptstyle M(%s) = ", end_val));
+        if (length(incognitas_momentos) > 0)
+            im_int = integrate_noconst(integrate_noconst(incognitas_momentos{i}));
+            program_logger.write_string(sprintf("M{\\langle %s-%d \\rangle}^{%d} + ", end_val, im_int.a, im_int.degree));
+        endif
+        if (length(incognitas_forcas_y) > 0)
+            ify_int = integrate_noconst(integrate_noconst(incognitas_forcas_y{i}));
+            program_logger.write_string(sprintf("Fy{\\langle %s-%d \\rangle}^{%d} + ", end_val, ify_int.a, ify_int.degree));
+        endif
+
+        program_logger.write_string(program_logger.string_form_evaluated(momentos_internos, end_val));
+        program_logger.write_string(" = 0}\\]");
+        program_logger.write_string(sprintf("\\[{\\scriptstyle M(%s) = ", end_val));
+        if (length(incognitas_momentos) > 0)
+            im_int = integrate_noconst(integrate_noconst(incognitas_momentos{i}));
+            program_logger.write_string(sprintf("M \\cdot %d + ", im_int(viga.width, +1)));
+        endif
+        if (length(incognitas_forcas_y) > 0)
+            ify_int = integrate_noconst(integrate_noconst(incognitas_forcas_y{i}));
+            program_logger.write_string(sprintf("Fy \\cdot %d + ", ify_int(viga.width, +1)));
+        endif
+
+        program_logger.write_string(sprintf("%d ", momentos_internos(viga.width, +1)));
+        program_logger.write_string(" = 0}\\]");
+
+
+
+
     for i = 1:length(incognitas_forcas_y)
         # Integramos uma vez para participar corretamente da eq. de forças cortantes
         incogn_integrada = integrate_noconst(incognitas_forcas_y{i});
@@ -131,7 +240,7 @@ function apoios = calcular_reacoes()
         incog = incognitas_momentos{i};
         # Adicionamos a resposta à função de singularidade da reação
         incog.multiplier = x(coluna_atual);
-
+        program_logger.write_string(sprintf("\\[{\\scriptstyle M = %d }\\]\n", incog.multiplier));
         # Adicionamos a função de singularidade da reação à lista de forças verticais (momentos são
         # inclusos)
         singfun_carregamentos{end+1} = incog;
@@ -146,7 +255,7 @@ function apoios = calcular_reacoes()
         incog = incognitas_forcas_y{i};
         # Adicionamos a resposta à função de singularidade da reação
         incog.multiplier = x(coluna_atual);
-
+        program_logger.write_string(sprintf("\\[{\\scriptstyle Fy = %d }\\]\n", incog.multiplier));
         # Adicionamos a função de singularidade da reação à lista de forças verticais
         singfun_carregamentos{end+1} = incog;
         # Além disso, definimos a reação no apoio
@@ -171,6 +280,9 @@ function apoios = calcular_reacoes()
     # Sabemos que as forças normais são zero a esquerda do início da viga e a direita do fim também
     # Teremos 2 equações para calcular as forças de reação dos apoios
 
+    program_logger.write_string("\\subsection*{Equação das forças horizontais}\n");
+    program_logger.write_string("\\[{\\scriptstyle f(x) = ");
+
     # Determinamos quantas incógnitas teremos
     incognitas_forcas_x = {};
     apoio_incognitas_forcas_x = {};
@@ -179,9 +291,13 @@ function apoios = calcular_reacoes()
             reacao_x = singfun(-1, apoios{i}.position);
             incognitas_forcas_x{end+1} = reacao_x;
             apoio_incognitas_forcas_x{end+1} = i;
+            program_logger.write_string(sprintf("Fx{\\langle x-%d \\rangle}^{%d} + ", apoios{i}.position, -1));
         endif
     endfor
     n_incognitas = length(incognitas_forcas_x);
+
+    program_logger.write_string(program_logger.string_form(forcas_x));
+    program_logger.write_string("}\\]");
 
     # As incógnitas serão resolvidas nas duas equações de forças normais, então vamos preparar as
     # matrizes para solução do sistema lienar
@@ -214,13 +330,52 @@ function apoios = calcular_reacoes()
     # Resolvemos o sistema linear
     x = linsolve(A, B);
 
+
+    #
+    # FORÇAS NORMAIS
+    #
+    program_logger.write_string("\\subsection*{Equação das forças normais}\n");
+    program_logger.write_string("\\[{\\scriptstyle N(x) = \\int_{}^{} f(x) \\,dx }\\]");
+    program_logger.write_string("\\[{\\scriptstyle N(x) = ");
+    if (length(incognitas_forcas_x) > 0)
+        ifx_int = integrate_noconst(incognitas_forcas_x{i});
+        program_logger.write_string(sprintf("Fx{\\langle x-%d \\rangle}^{%d} + ", ifx_int.a, ifx_int.degree));
+    endif
+
+    program_logger.write_string(program_logger.string_form(forcas_normais));
+    program_logger.write_string("}\\]");
+
+    #
+    # REAÇÕES DE APOIO
+    #
+    program_logger.write_string("\\subsection*{Reações de apoio}\n");
+    end_val = sprintf("%d^{+}", viga.width);
+    program_logger.write_string(sprintf("\\[{\\scriptstyle N(%s) = ", end_val));
+
+    if (length(incognitas_forcas_x) > 0)
+        ifx_int = integrate_noconst(incognitas_forcas_x{i});
+        program_logger.write_string(sprintf("Fx{\\langle %s-%d \\rangle}^{%d} + ", end_val, ifx_int.a, ifx_int.degree));
+    endif
+
+    program_logger.write_string(program_logger.string_form_evaluated(forcas_normais, end_val));
+    program_logger.write_string(" = 0}\\]");
+    program_logger.write_string(sprintf("\\[{\\scriptstyle N(%s) = ", end_val));
+    if (length(incognitas_forcas_x) > 0)
+        ifx_int = integrate_noconst(incognitas_forcas_x{i});
+        program_logger.write_string(sprintf("Fx \\cdot %d + ", ifx_int(viga.width, +1)));
+    endif
+
+    program_logger.write_string(sprintf("%d ", forcas_normais(viga.width, +1)));
+    program_logger.write_string(" = 0}\\]");
+
+
     # Colocamos a resposta na lista de forças e ainda ao suporte
     coluna_atual = 1;
     for i = 1:length(incognitas_forcas_x)
         incog = incognitas_forcas_x{i};
         # Adicionamos a resposta à função de singularidade da reação
         incog.multiplier = x(coluna_atual);
-
+        program_logger.write_string(sprintf("\\[{\\scriptstyle Fx = %d }\\]\n", incog.multiplier));
         # Adicionamos a função de singularidade da reação à lista de forças horizontais
         singfun_forcas_x{end+1} = incog;
         # Além disso, definimos a reação no apoio
@@ -245,6 +400,9 @@ function apoios = calcular_reacoes()
     # Sabemos que o torque interno é zero a esquerda do início da viga e a direita do fim da viga
     # Teremos 2 equações para calcular os torques de reação dos apoios
 
+    program_logger.write_string("\\subsection*{Equação dos torques}\n");
+    program_logger.write_string("\\[{\\scriptstyle t(x) = ");
+
     # Determinamos quantas incógnitas teremos
     incognitas_torques = {};
     apoio_incognitas_torques = {};
@@ -253,9 +411,13 @@ function apoios = calcular_reacoes()
             reacao_torque = singfun(-1, apoios{i}.position);
             incognitas_torques{end+1} = reacao_torque;
             apoio_incognitas_torques{end+1} = i;
+            program_logger.write_string(sprintf("T{\\langle x-%d \\rangle}^{%d} + ", apoios{i}.position, -1));
         endif
     endfor
     n_incognitas = length(incognitas_torques);
+
+    program_logger.write_string(program_logger.string_form(torques));
+    program_logger.write_string("}\\]");
 
     # As incógnitas serão resolvidas nas duas equações de torques internos, então vamos preparar as
     # matrizes para solução do sistema lienar
@@ -288,13 +450,53 @@ function apoios = calcular_reacoes()
     # Resolvemos o sistema linear
     x = linsolve(A, B);
 
+    #
+    # TORQUES INTERNOS
+    #
+    program_logger.write_string("\\subsection*{Equação dos torques internos}\n");
+    program_logger.write_string("\\[{\\scriptstyle T(x) = \\int_{}^{} t(x) \\,dx }\\]");
+    program_logger.write_string("\\[{\\scriptstyle T(x) = ");
+    if (length(incognitas_torques) > 0)
+        it_int = integrate_noconst(incognitas_torques{i});
+        program_logger.write_string(sprintf("T{\\langle x-%d \\rangle}^{%d} + ", it_int.a, it_int.degree));
+    endif
+
+    program_logger.write_string(program_logger.string_form(torques_internos));
+    program_logger.write_string("}\\]");
+
+    #
+    # REAÇÕES DE APOIO
+    #
+    program_logger.write_string("\\subsection*{Reações de apoio}\n");
+    end_val = sprintf("%d^{+}", viga.width);
+    program_logger.write_string(sprintf("\\[{\\scriptstyle T(%s) = ", end_val));
+
+    if (length(incognitas_torques) > 0)
+        it_int = integrate_noconst(incognitas_torques{i});
+        program_logger.write_string(sprintf("T{\\langle %s-%d \\rangle}^{%d} + ", end_val, it_int.a, it_int.degree));
+    endif
+
+    program_logger.write_string(program_logger.string_form_evaluated(torques_internos, end_val));
+    program_logger.write_string(" = 0}\\]");
+    program_logger.write_string(sprintf("\\[{\\scriptstyle T(%s) = ", end_val));
+    if (length(incognitas_torques) > 0)
+        it_int = integrate_noconst(incognitas_torques{i});
+        program_logger.write_string(sprintf("T \\cdot %d + ", it_int(viga.width, +1)));
+    endif
+
+    program_logger.write_string(sprintf("%d ", torques_internos(viga.width, +1)));
+    program_logger.write_string(" = 0}\\]");
+
+
+
+
     # Colocamos a resposta na lista de torques e ainda ao suporte
     coluna_atual = 1;
     for i = 1:length(incognitas_torques)
         incog = incognitas_torques{i};
         # Adicionamos a resposta à função de singularidade da reação
         incog.multiplier = x(coluna_atual);
-
+        program_logger.write_string(sprintf("\\[{\\scriptstyle T = %d }\\]\n", incog.multiplier));
         # Adicionamos a função de singularidade da reação à lista de torques externos
         singfun_torques{end+1} = incog;
         # Além disso, definimos a reação no apoio
